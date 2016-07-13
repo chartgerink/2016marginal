@@ -55,7 +55,7 @@ for(doi in dois)
     write.csv(df, 
               sprintf('apa_articles/%s/results.csv', doi),
               row.names = FALSE)
-    rbind(res, df)
+    res <- rbind(res, df)
   }
   cat(doi)
 }
