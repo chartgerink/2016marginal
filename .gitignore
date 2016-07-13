@@ -1,2 +1,4 @@
 # Ignore all copyrighted articles. (MUST)
-apa_articles/*
+apa_articles/*/fulltext.html
+apa_articles/*/fulltext.txt
+.Rproj.user
