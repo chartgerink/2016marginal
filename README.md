@@ -23,7 +23,7 @@ These data are extracted from each article first and then collated into one fina
 Before collecting the *p*-values from the articles, first the metadata for each article are collected. To this end, the following script is run.
 
 ```bash
-ls apa_articles > data/doi
+ls apa_articles | grep -v nodoi > data/doi
 mkdir data/metadata
 
 for i in $(cat data/doi)
