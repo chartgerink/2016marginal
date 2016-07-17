@@ -2,7 +2,7 @@
 
 This project investigates the claims made in Pritschet et al. 2016 (*Psych. Sci.*). HTML articles from APA journals were collected in another project by CHJH (see [here](https://github.com/chartgerink/2016statcheck_data)), which were scanned here for *p*-values. These articles are subject to copyright and are not shared in this repository (local backups exist so more than willing to share for verification purposes).
 
-After neatly ordering the HTMLs into separate folders ([script](functions/apa_foldering.sh)), these articles were converted from HTML to TXT with the tool `html2text` ([developed by Aaron Swartz](https://github.com/aaronsw/html2text)). Shell command `sh functions/html2text.sh`.
+After neatly ordering the HTMLs into separate folders ([script](functions/apa_foldering.sh)), these articles were converted from HTML to TXT with the tool `html2text` ([developed by Aaron Swartz](https://github.com/aaronsw/html2text) and now maintained [here](https://github.com/Alir3z4/html2text); be sure to install with `pip install html2text`). Shell command `sh functions/html2text.sh`.
 
 The data were extracted from the articles with regular expressions. Variables included are: 
 
