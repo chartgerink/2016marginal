@@ -39,13 +39,16 @@ for(doi in dois)
   
   # Combine with previously collected metadata
   sel <- grepl(list.files('data/metadata'), pattern = doi)
-  x <- read.csv(sprintf('data/metadata/%s', list.files('data/metadata')[sel]), header = FALSE)
+  x <- tryCatch(read.csv(sprintf('data/metadata/%s',
+   list.files('data/metadata')[sel]),
+    header = FALSE),
+  error = function (e) data.frame(V1 = NA, V2 = NA))
   
   if(!is.null(comparison))
   {
     df <- data.frame(doi,
-                     journal = as.character(x$V1),
-                     year = as.numeric(x$V2),
+                     journal = as.character(x$V1)[1],
+                     year = as.numeric(x$V2)[1],
                      pre,
                      result,
                      post,
