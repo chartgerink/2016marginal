@@ -12,3 +12,7 @@ do
  mkdir -p apa_articles/$doi_extract
  mv $file apa_articles/$doi_extract/fulltext.html 
 done
+
+# Correct two erroneous folders.
+mv apa_articles/10.1037_0278-6133.27.2\(Suppl. apa_articles/10.1037_0278-6133.27.2\(Suppl.\).S180
+mv apa_articles/10.1037_0278-6133.27.3\(Suppl. apa_articles/10.1037_0278-6133.27.3\(Suppl.\).S271
