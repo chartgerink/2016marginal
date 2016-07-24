@@ -34,4 +34,10 @@ done
 rm data/doi
 ```
 
-`results.csv` for each article was generated in `R` (see [script](functions/data_extraction.R)). This is run from a shell with `Rscript functions/data_extraction.R`. This also collates the individual files into a big one in the `data/` folder.
+`results.csv` for each article was generated in `R` (see [script](functions/data_extraction.R)). This is run from a shell with `Rscript functions/data_extraction.R`. To collate all these files into one big file run
+
+```bash
+echo '"doi","journal","year","pre","result","post","comparison","value"' > data/marginal_dataset.csv
+
+for file in apa_articles/*/results.csv; do cat $file | grep -vP '"doi","journal","year","pre","result","post","comparison","value"'>> data/marginal_dataset.csv; echo $file; done
+```

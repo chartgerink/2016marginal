@@ -60,27 +60,3 @@ for(doi in dois)
     cat(sprintf('%s\n', doi)) 
   }
 }
-
-# Concatenate the individual files
-x <- list.files('apa_articles', recursive = TRUE)
-files <- x[grepl(pattern = 'results.csv', x)]
-
-res <- data.frame(doi = NULL,
-                  journal = NULL,
-                  year = NULL,
-                  pre = NULL,
-                  result = NULL,
-                  post = NULL,
-                  comparison = NULL,
-                  value = NULL)
-
-for(file in files)
-{
-  df <- read.csv(sprintf('apa_articles/%s',file))
-  
-  res <- rbind(res, df)
-}
-
-write.csv(res, 
-          'data/marginal_dataset.csv',
-          row.names = FALSE)
