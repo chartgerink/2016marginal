@@ -48,7 +48,7 @@ In order to create a more managable file for analyses and filter the data, the f
 if(!require(plyr)){install.packages('plyr')}
 library(plyr)
 
-dat <- read.csv('marginal_dataset.csv', stringsAsFactors = FALSE)
+dat <- read.csv('data/marginal_dataset.csv', stringsAsFactors = FALSE)
 dat$value <- as.numeric(dat$value)
 
 seldoi <- !grepl('nodoi', x = dat$doi)
