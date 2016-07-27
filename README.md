@@ -64,7 +64,7 @@ selJour <- dat$journal == 'Journal of Personality and Social Psychology' |
  dat$journal == 'Health Psychology' |
  dat$journal == 'Psychological Assessment'
 
-write.csv(ddply(dat[seldoi & selJour], .(year, journal), summarize, count = length(value)),
+write.csv(ddply(dat[seldoi & selJour, ], .(year, journal), summarize, count = length(value)),
  'data/year_count.csv',
  row.names = FALSE)
 
