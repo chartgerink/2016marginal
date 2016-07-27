@@ -41,3 +41,32 @@ echo '"doi","journal","year","pre","result","post","comparison","value"' > data/
 
 for file in apa_articles/*/results.csv; do cat $file | grep -vP '"doi","journal","year","pre","result","post","comparison","value"'>> data/marginal_dataset.csv; echo $file; done
 ```
+
+In order to create a more managable file for analyses and filter the data, the following code was run to select a set of results from `data/marginal_dataset.csv` and retrieve the information needed from the entire dataset.
+
+```R
+if(!require(plyr)){install.packages('plyr')}
+library(plyr)
+
+dat <- read.csv('marginal_dataset.csv', stringsAsFactors = FALSE)
+dat$value <- as.numeric(dat$value)
+
+seldoi <- !grepl('nodoi', x = dat$doi)
+selVal <- dat$value >= .05 & dat$value <= .10
+selJour <- dat$journal == 'Journal of Personality and Social Psychology' |
+ dat$journal == 'Behavioral Neuroscience' |
+ dat$journal == 'Developmental Psychology' |
+ dat$journal == 'Journal of Consulting and Clinical Psychology' |
+ dat$journal == 'Journal of Experimental Psychology: General' |
+ dat$journal == 'Emotion' |
+ dat$journal == 'Journal of Educational Psychology' |
+ dat$journal == 'Journal of Applied Psychology' |
+ dat$journal == 'Health Psychology' |
+ dat$journal == 'Psychological Assessment'
+
+write.csv(ddply(dat[seldoi & selJour], .(year, journal), summarize, count = length(value)),
+ 'data/year_count.csv',
+ row.names = FALSE)
+
+write.csv(dat[seldoi & selVal & selJour, ], 'data/select_marginal_data.csv', row.names = FALSE)
+```
