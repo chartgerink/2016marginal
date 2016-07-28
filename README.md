@@ -64,9 +64,9 @@ selJour <- dat$journal == 'Journal of Personality and Social Psychology' |
  dat$journal == 'Health Psychology' |
  dat$journal == 'Psychological Assessment'
 
-write.csv(ddply(dat[seldoi & selJour, ], .(year, journal), summarize, count = length(value)),
+write.csv(ddply(dat[seldoi & selJour & !is.na(dat$journal), ], .(year, journal), summarize, count = length(value)),
  'data/year_count.csv',
  row.names = FALSE)
 
-write.csv(dat[seldoi & selVal & selJour, ], 'data/select_marginal_data.csv', row.names = FALSE)
+write.csv(dat[seldoi & selVal & selJour & !is.na(dat$journal), ], 'data/select_marginal_data.csv', row.names = FALSE)
 ```
