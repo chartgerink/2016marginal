@@ -35,6 +35,11 @@ for(doi in dois)
     
     value <- unlist(str_match_all(result, pattern = "\\d?\\.\\d*"))
     
+    pre_margin <- grepl(pattern = 'margin', pre)
+    pre_approach <- grepl(pattern = 'approach', pre)
+    post_margin <- grepl(pattern = 'margin', post)
+    post_approach <- grepl(pattern = 'approach', post)
+    
     # Combine with previously collected metadata
     sel <- grepl(list.files('data/metadata'), pattern = doi)
     x <- tryCatch(read.csv(sprintf('data/metadata/%s',
