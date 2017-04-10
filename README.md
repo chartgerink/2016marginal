@@ -70,3 +70,7 @@ write.csv(ddply(dat[seldoi & selJour & !is.na(dat$journal), ], .(year, journal),
 
 write.csv(dat[seldoi & selVal & selJour & !is.na(dat$journal), ], 'data/select_marginal_data.csv', row.names = FALSE)
 ```
+
+# Data location
+
+The data is not in this Github repository because it is too large (~350MB). It is stored on the OSF ([here](https://osf.io/28gxz/)) and will be archived at Zenodo.
