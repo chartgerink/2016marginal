@@ -117,18 +117,12 @@ additional.metadata[additional.metadata$doi == "10.1037/0003-066X.60.8.750",] #d
 additional.metadata[additional.metadata$doi == "10.1037/0003-066x.60.8.750",] #does work
 #Problem appears to be that some letters ("x" here) are capitalized in original dataset, but not in the dois retrieved from crossref
 
-#retrieve the still missing vmetadata from crossref
-still.missing <- dat$doi[is.na(dat$year)]
-retrieved.metadata.still.missing <- cr_works(dois = still.missing)
-missing.metadata <- data.frame("doi"= retrieved.metadata.still.missing$data$DOI, "year" = retrieved.metadata.still.missing$data$issued, "journal" = retrieved.metadata.still.missing$data$container.title, stringsAsFactors = FALSE)
-
-#Temporary save-file
-write.csv(missing.metadata, file = "still_missing_metadata.csv", row.names = F)
-missing.metadata <- read.csv("still_missing_metadata.csv", stringsAsFactors = FALSE)
+#Select out the non-matching metadata
+not.matching <- subset(additional.metadata, !(additional.metadata$doi %in% dat$doi))
 
 #Complete the original dataset
-dat$year[is.na(dat$year)] <- missing.metadata$year[match(tolower(dat$doi[is.na(dat$year)]), missing.metadata$doi)]
-dat$journal[is.na(dat$journal)] <- missing.metadata$journal[match(tolower(dat$doi[is.na(dat$journal)]), missing.metadata$doi)]
+dat$year[is.na(dat$year)] <- not.matching$year[match(tolower(dat$doi[is.na(dat$year)]), not.matching$doi)]
+dat$journal[is.na(dat$journal)] <- not.matching$journal[match(tolower(dat$doi[is.na(dat$journal)]), not.matching$doi)]
 
 #Check if solved
 which(is.na(dat$year)) #none missing
