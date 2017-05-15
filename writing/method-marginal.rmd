@@ -2,9 +2,10 @@
 title: "Method"
 author: "Anton Ohsson Collentine"
 date: "April 25, 2017"
-output: pdf_document
+output: word_document
 bibliography: ../bibliography/bibliography-FYP.bib
 csl: ../bibliography/apa.csl
+figs: .../figures
 ---
 
 ##Method
@@ -14,7 +15,10 @@ The sample consisted of a large number of p-values extracted from articles publi
 ###Data
 Extracted data was cleaned, subfield categories added, and a subsample for testing and pre-registration purposes created (figure 1). From the articles provided by @10.3390/data1030014 790,206 p-values were extracted. According to @10.3758/s13428-015-0664-2 the vast majority of researchers (94.3%) consider $p = .05$ as significant, and as such we limited our sample to $p > .05$. In addition, @10.1177/0956797616645672, in an subanalysis of the distribution of p-values, report a sharp drop in p-values reported as marginally significant above $p = .1$, and we therefore used as an upper limit $p <= .1$. Approximately 6.4% of all extracted p-values fell between these values ($.05 < p <= .1$). Prior to this process, we removed a small number of entries (1,124) from the dataset because of misreporting or extraction-failure, although this number does not include p-values that were misreported as too high (_e.g._ $p = 1.0$ instead of $p = .10$) or as possible p-values (_e.g._ $p = .99$ instead of $p = .099$). However, according to @10.3758/s13428-015-0664-2, misreporting occurs for only about .97% of nonsignificant p-values (defined as $p > .05$). Our categorization of journals into different subfields is taken from the APA's ([www.apa.org](www.apa.org)) division of their journals into 'topics'. Note, however, that the APA allows the possibility of a journal belonging to several subfields. A full list of which journals were included in which subfields can be found in appendix A. Finally, a stratified random sample (by journal) was taken from the finished dataset. For a more detailed walkthrough of the data preparation, refer to appendix B.
 
-![**Figure 1.** Flowchart illustrating the data cleaning process](C:/Users/Anton2/Documents/GIT/2016marginal/flowchart_marginal.png)
+```{r flowchart, fig.cap="_Figure 1._ Flowchart illustrating the data cleaning process.", out.width="60%", out.height="60%", fig.align="center", echo = FALSE}
+knitr::include_graphics("C:/Users/Anton2/Dropbox/Tilburg/FYP/figures/flowchart_marginal.png", auto_pdf = TRUE)
+```
+
 
 ###Analysis
 We describe the percentage of p-values ($.05 < p <= .1$) reported as marginally significant in a population of APA journals, overall and by subfields. We extracted p-values and surrounding information from the full-text of 19,875 articles from 1985-2016. Due to the size and non-random nature of our sample we consider it our population of interest and report only descriptive statistics. To determine whether a result was reported as marginally significant, we searched the 200 characters preceding and succeeding a given p-value for strings containing "marginal" and "approach", and considered the p-value to be reported as marginally significant if either of those strings was found. For the analyses the extracted p-values were aggregated by subfield and overall. Finally, to facilitate interpretation we estimated linear trends and report regression coefficients, as well as proportion of variance explained.
