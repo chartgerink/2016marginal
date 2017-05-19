@@ -16,7 +16,7 @@ sort(table(dat.marginal$journal))
 #5 journals have 4 or fewer rows in the dataframe, and we would have to sample a prohibitively large proportion
 #of entries (>25%) for these to show up in the stratified sample. These are:
 which(table(dat.marginal$journal) < 5) 
-#All other journal consist >=10 rows, i.e. it is sufficient to sample anything >5% for these to show up in the sample.
+#All other journal consist >=9 rows, i.e. it is sufficient to sample ~6% for these to show up in the sample.
 
 #Take a stratified sample, consisting of approximately 6% of entries from each journal
 set.seed(1)

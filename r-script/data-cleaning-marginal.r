@@ -6,7 +6,7 @@
 #Set working directory
 
 #Load dataset
-dat <- read.csv("marginal_dataset.csv", stringsAsFactors = FALSE)
+dat <- read.csv("marginal_dataset.csv", stringsAsFactors = FALSE, strip.white = TRUE)
 #Force dat$value into a numeric variable
 dat$value <- as.numeric(dat$value)
 #Remove scientific notation
@@ -62,9 +62,9 @@ sum(is.na(dat$post)) #None
 #Unfortunately the dataset does not contain enough information to find out the missing dois, but since there are only 
 #51/790206 rows with missing dois the impact of removal should be low. 
 
-#--------------------------------------------------------
+#-------------------------------------------------------------
 ##Initial cleaning of data
-#--------------------------------------------------------
+#------------------------------------------------------------
 #removal of entries with missing doi
 dat <- dat[!grepl("nodoi", dat$doi),]
 
@@ -76,56 +76,65 @@ dat$doi
 #correction of doi format
 dat$doi <- gsub("_", "/", dat$doi)
 
-#Limit dataset to only values between .05 < p <= .1
-dat <- dat[dat$value > 0.05 & dat$value <= 0.1,]
-
-#--------------------------------------------------------
+#---------------------------------------
 ##Retrieval of missing metadata (journal names and years)
-#--------------------------------------------------------
-
-#Subset of dois for those entries missing journal name and year (these are the same entries)
-doi.missing.metadata <- subset(dat$doi, is.na(dat$journal))
-length(doi.missing.metadata) #844 dois
-
+#---------------------------------------
 #load required library
 if(!require(rcrossref)){install.packages("rcrossref")}
 library(rcrossref)
+
+#Subset of dois for those entries missing journal name and year (these are the same entries)
+doi.missing.metadata <- subset(dat$doi, is.na(dat$journal))
+length(doi.missing.metadata) #12775 dois
 
 #retrieve metadata for all dois with missing years and journals, NB! can take some time
 retrieved.metadata <- cr_works(dois = doi.missing.metadata)
 
 #separate out doi, journal name and year from metadata
-missing.metadata <- data.frame("doi"= retrieved.metadata$data$DOI, "year" = retrieved.metadata$data$issued, "journal" = retrieved.metadata$data$container.title)
+missing.metadata <- data.frame("doi"= retrieved.metadata$data$DOI, "year" = retrieved.metadata$data$issued, 
+                               "journal" = retrieved.metadata$data$container.title, stringsAsFactors = FALSE)
+
+missing.metadata$year <- as.integer(missing.metadata$year)
 
 #Add the missing metadata to the dataset
 dat$year[is.na(dat$year)] <- missing.metadata$year[match(dat$doi[is.na(dat$year)], missing.metadata$doi)]
 dat$journal[is.na(dat$journal)] <- missing.metadata$journal[match(dat$doi[is.na(dat$journal)], missing.metadata$doi)]
 
+#Temporary save-file
+write.csv(additional.metadata, file = "missing_metadata.csv", row.names = F)
+additional.metadata <- read.csv("missing_metadata.csv", stringsAsFactors = FALSE)
+
+#Add the missing metadata to the original dataframe
+dat$year[is.na(dat$year)] <- additional.metadata$year[match(dat$doi[is.na(dat$year)], additional.metadata$doi)]
+dat$journal[is.na(dat$journal)] <- additional.metadata$journal[match(dat$doi[is.na(dat$journal)], additional.metadata$doi)]
+
 #Check if worked                                            
-sum(is.na(dat$year)) #not for 77 rows
+sum(is.na(dat$year)) #not for 1295 rows
 which(is.na(dat$year))
-dat[13848,] #closer look at one example ("10.1037/0033-295X.101.1.3")
-missing.metadata[missing.metadata$doi == "10.1037/0033-295X.101.1.3",] #does not work
-missing.metadata[missing.metadata$doi == "10.1037/0033-295x.101.1.3",] #does work
+dat[12399,] #closer look at one example
+dat[dat$doi == "10.1037/0003-066X.60.8.750",]
+additional.metadata[additional.metadata$doi == "10.1037/0003-066X.60.8.750",] #does not work
+additional.metadata[additional.metadata$doi == "10.1037/0003-066x.60.8.750",] #does work
 #Problem appears to be that some letters ("x" here) are capitalized in original dataset, but not in the dois retrieved from crossref
 
 #Select out the non-matching metadata
-not.matching <- subset(missing.metadata, !(missing.metadata$doi %in% dat$doi))
+not.matching <- subset(additional.metadata, !(additional.metadata$doi %in% dat$doi))
 
-#Merge the dataset with the still missing metadata with the help of the function 'tolower'
+#Complete the original dataset
 dat$year[is.na(dat$year)] <- not.matching$year[match(tolower(dat$doi[is.na(dat$year)]), not.matching$doi)]
 dat$journal[is.na(dat$journal)] <- not.matching$journal[match(tolower(dat$doi[is.na(dat$journal)]), not.matching$doi)]
 
-#Check if any missing values remaining
-sum(is.na(dat)) #none missing
+#Check if solved
+which(is.na(dat$year)) #none missing
 
-#--------------------------------------------
+#-------------------------------------------
 ##Add information on topics for each journal
-#--------------------------------------------
+#----------------------------------
 #check so that all journal names are written correctly
 unique(dat$journal) 
 
 #a number of journal names need to be updated for consistency
+dat$journal <- gsub("Canadian Journal Of Behavioural Science", "Canadian Journal of Behavioural Science", dat$journal)
 dat$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des Sciences du comportement", "Canadian Journal of Behavioural Science", dat$journal)
 dat$journal <- gsub("Canadian Journal of Behavioural Science / Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", dat$journal)
 dat$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", dat$journal)
@@ -135,6 +144,7 @@ dat$journal <- gsub("Canadian Journal of Psychology Revue Canadienne de Psycholo
 dat$journal <- gsub("Canadian Journal of Psychology/Revue canadienne de psychologie", "Canadian Journal of Experimental Psychology", dat$journal)
 dat$journal <- gsub("Canadian Journal of Experimental Psychology/Revue canadienne de psychologie expérimentale", "Canadian Journal of Experimental Psychology", dat$journal)
 
+dat$journal <- gsub("Canadian Psychology Psychologie Canadienne", "Canadian Psychology", dat$journal)
 dat$journal <- gsub("Canadian Psychology/Psychologie canadienne", "Canadian Psychology", dat$journal)
 dat$journal <- gsub("Canadian Psychology/Psychologie Canadienne", "Canadian Psychology", dat$journal)
 
@@ -165,9 +175,20 @@ topics <- read.csv2("apa_topics_dummies.csv", header = TRUE, stringsAsFactors = 
 #Merge with main dataframe
 dat <- merge(dat, topics, by = "journal")
 
-#---------------------------------------------
-##Save finished dataset
-#---------------------------------------------
-write.csv(dat, file = "cleaned_restrictedp_marginal_dataset.csv", row.names = F)
+#Save finished dataset
+write.csv(dat, file = "cleaned_full_marginal_dataset.csv", row.names = F)
 
-#---------------------------------------------
+#-------------------------------------------------------
+##Create dataset with only values between .05 < p <= .1
+#------------------------------------------------------
+dat <- dat[dat$value > 0.05 & dat$value <= 0.1,]
+dat.marginal <- dat[!(dat$value == 0.1 & dat$comparison == ">"),]
+
+#Add a variable indicating whether a p-value appears to reported as marginally significant
+dat$marginal <- grepl("marginal|approach", dat$pre) | grepl("marginal|approach", dat$post)
+
+#Save finished dataset
+write.csv(dat.marginal, file = "cleaned_restrictedp_marginal_dataset.csv", row.names = F)
+
+#----------------------------------------------------
+

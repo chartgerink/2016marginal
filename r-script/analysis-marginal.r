@@ -6,9 +6,6 @@
 #Load dataset
 dat <- read.csv("test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)
 
-#Add a variable indicating whether a p-value appears to reported as marginally significant
-dat$marginal <- grepl("marginal|approach", dat$pre) | grepl("marginal|approach", dat$post)
-
 #---------------------------------------------------------------------
 ##Datasets with proportion of marginal results per year for different subfield
 #---------------------------------------------------------------------

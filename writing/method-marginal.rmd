@@ -2,7 +2,7 @@
 title: "Method"
 author: "Anton Ohsson Collentine"
 date: "April 25, 2017"
-output: word_document
+output: html_document
 bibliography: ../bibliography/bibliography-FYP.bib
 csl: ../bibliography/apa.csl
 figs: .../figures
