@@ -8,91 +8,72 @@
 #load the full cleaned dataset with added topics
 dat <- read.csv("cleaned_full_marginal_dataset.csv", stringsAsFactors = FALSE)
 
+#Restricted dataset
+dat2 <- dat[dat$value > 0.05 & dat$value <= 0.1,]
+dat2 <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparison == ">"),]
+#Add a variable indicating whether a p-value appears to reported as marginally significant to restricted dataset
+dat2$marginal <- grepl("marginal|approach", dat2$pre) | grepl("marginal|approach", dat2$post)
+
 #------------------------------------------
-##Replication table
+##Replication/Pritschet et al table - JPSP and DP
 #------------------------------------------
 
-#JPSP data from replication
-  #Number of articles for 1990, 2000, and 2010
-  a.jpsp.1990 <- length(unique(dat$doi[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 1990]))
-  a.jpsp.2000 <- length(unique(dat$doi[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2000]))
-  a.jpsp.2010 <- length(unique(dat$doi[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2010]))
+years <- c(1990, 2000, 2010)
 
-  #Number of p-values/article 1990, 2000 and 2010
-  results.jpsp.1990 <- length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 1990]) / a.jpsp.1990
-  results.jpsp.2000 <- length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2000]) / a.jpsp.2000
-  results.jpsp.2010 <- length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2010]) / a.jpsp.2010
-
-  #Load restricted dataset
-  dat2 <- read.csv("cleaned_restrictedp_marginal_dataset.csv", stringsAsFactors = F)
+#Number of articles replication
   
-  #Percentage of p-values .05 < p <= .1 1990, 2000 and 2010
-  p.jpsp.1990 <- 100*(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990]) /
-                      length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 1990]))
-                
-  p.jpsp.2000 <- 100*(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2000]) /
-                      length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2000]))
+a.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  a.jpsp[year] <- length(unique(dat$doi[dat$journal == "Journal of Personality and Social Psychology" & dat$year == years[year]])) }
 
-  p.jpsp.2010 <- 100*(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2010]) /
-                      length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2010]))
-
-  #Percentage of p-values marginally significant 1990, 2000 and 2010
-  marg.jpsp.1990 <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990]) /
-                        length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990]))
-
-  marg.jpsp.2000 <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2000]) /
-                        length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2000]))
-
-  marg.jpsp.2010 <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2010]) /
-                        length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2010]))
-
-  #Create data frame
-  df.r1 <- data.frame("journal" = rep("JPSP",3), "year" = c(1990,2000,2010), 
-                    "rep_articles" = c(a.jpsp.1990, a.jpsp.2000, a.jpsp.2010), 
-                    "rep_p-values.per.article" = round(c(results.jpsp.1990, results.jpsp.2000, results.jpsp.2010), digits = 2),
-                    "rep_percent.05.p.1" = round(c(p.jpsp.1990, p.jpsp.2000, p.jpsp.2010), digits = 2), 
-                    "rep_marginally.significant.%" = round(c(marg.jpsp.1990, marg.jpsp.2000, marg.jpsp.2010), digits = 2))
-
-#Developmental Psychology data from replication
-  #Number of articles for 1990, 2000, and 2010
-  a.dp.1990 <- length(unique(dat$doi[dat$journal == "Developmental Psychology" & dat$year == 1990]))
-  a.dp.2000 <- length(unique(dat$doi[dat$journal == "Developmental Psychology" & dat$year == 2000]))
-  a.dp.2010 <- length(unique(dat$doi[dat$journal == "Developmental Psychology" & dat$year == 2010]))
-
-  #Number of p-values/article 1990, 2000 and 2010
-  results.dp.1990 <- length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 1990]) / a.dp.1990
-  results.dp.2000 <- length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 2000]) / a.dp.2000
-  results.dp.2010 <- length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 2010]) / a.dp.2010
+a.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  a.dp[year] <- length(unique(dat$doi[dat$journal == "Developmental Psychology" & dat$year == years[year]])) }
+    
+#Number of p-values/article replication
   
-  #Percentage of p-values .05 < p <= .1 1990, 2000 and 2010
-  p.dp.1990 <- 100*(length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 1990]) /
-                      length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 1990]))
-                
-  p.dp.2000 <- 100*(length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 2000]) /
-                      length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 2000]))
+results.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  results.jpsp[year] <- length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == years[year]]) / 
+    a.jpsp[year] }
+  
+results.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  results.dp[year] <- length(dat$result[dat$journal == "Developmental Psychology" & dat$year == years[year]]) / 
+    a.dp[year] }
+ 
 
-  p.dp.2010 <- 100*(length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 2010]) /
-                      length(dat$result[dat$journal == "Developmental Psychology" & dat$year == 2010]))
+#Percentage of p-values .05 < p <= .1 replication
+  
+p.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  p.jpsp[year] <- 100*(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == years[year]]) /
+                    length(dat$result[dat$journal == "Journal of Personality and Social Psychology" & dat$year == years[year]])) }
+  
+p.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  p.dp[year] <- 100*(length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == years[year]]) /
+                    length(dat$result[dat$journal == "Developmental Psychology" & dat$year == years[year]])) }
+    
+#Percentage of .05 < p <= .1 marginally significant replication
 
-  #Percentage of p-values marginally significant 1990, 2000 and 2010
-  marg.dp.1990 <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == 1990]) /
-                        length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 1990]))
+marg.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  marg.jpsp[year] <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == years[year]]) /
+                      length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == years[year]])) }
+  
+marg.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  marg.dp[year] <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == years[year]]) /
+                      length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == years[year]])) }
+   
+#Data frame of replication data
+df.rep <- data.frame("journal" = c(rep("JPSP",3), rep("Developmental Psychology",3)), "year" = rep(years,2), 
+                  "rep_articles" = c(a.jpsp, a.dp), 
+                  "rep_p-values.per.article" = round(c(results.jpsp, results.dp), digits = 2),
+                  "rep_percent.05.p.1" = round(c(p.jpsp, p.dp), digits = 2), 
+                  "rep_marginally.significant.%" = round(c(marg.jpsp, marg.dp), digits = 2))
 
-  marg.dp.2000 <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == 2000]) /
-                        length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 2000]))
-
-  marg.dp.2010<- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == 2010]) /
-                        length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 2010]))
-
-  #Create data frame
-  df.r2 <- data.frame("journal" = rep("Developmental Psychology",3), "year" = c(1990,2000,2010), 
-                    "rep_articles" = c(a.dp.1990, a.dp.2000, a.dp.2010), 
-                    "rep_p-values.per.article" = round(c(results.dp.1990, results.dp.2000, results.dp.2010), digits = 2),
-                    "rep_percent.05.p.1" = round(c(p.dp.1990, p.dp.2000, p.dp.2010), digits = 2), 
-                    "rep_marginally.significant.%" = round(c(marg.dp.1990, marg.dp.2000, marg.dp.2010), digits = 2))
-
-#Merge replication JPSP and DP data
-df.rep <- rbind(df.r1, df.r2)
 
 #Load data from Pritschet et al
   dat3 <- read.csv("marginals psych science revision_corrections.csv", stringsAsFactors = FALSE)
@@ -102,51 +83,38 @@ df.rep <- rbind(df.r1, df.r2)
   #Field 2 is Developmental psychology, and field 3 JPSP
   dat3 <- data.frame(dat3$Field, dat3$Year, dat3$Marginals.Yes.No)
 
-#Pritschet et al data from JPSP
-  #Number of articles per year for JPSP in Pritschet et al, NB! each row represents an article
-  pritschet.articles.jpsp.1990 <- nrow(dat3[dat3$dat3.Field == 3 & dat3$dat3.Year == 1990,])
-  pritschet.articles.jpsp.2000 <- nrow(dat3[dat3$dat3.Field == 3 & dat3$dat3.Year == 2000,])
-  pritschet.articles.jpsp.2010 <- nrow(dat3[dat3$dat3.Field == 3 & dat3$dat3.Year == 2010,])
+#Number of articles per year Pritschet et al
+pritschet.articles.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  pritschet.articles.jpsp[year] <- nrow(dat3[dat3$dat3.Field == 3 & dat3$dat3.Year == years[year],]) }
 
-  #percentage of articles containing at least one marginally significant result in JPSP
-  pritschet.marginal.jpsp.1990 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 3 & dat3$dat3.Year == 1990]) / 
-                                        pritschet.articles.jpsp.1990)
-  pritschet.marginal.jpsp.2000 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 3 & dat3$dat3.Year == 2000]) / 
-                                        pritschet.articles.jpsp.2000)
-  pritschet.marginal.jpsp.2010 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 3 & dat3$dat3.Year == 2010]) / 
-                                        pritschet.articles.jpsp.2010)
+pritschet.articles.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  pritschet.articles.dp[year] <- nrow(dat3[dat3$dat3.Field == 2 & dat3$dat3.Year == years[year],]) }
 
-  #dataframe pritschet jpsp
-  df.p1 <- data.frame("journal" = rep("JPSP",3), "year" = c(1990,2000,2010), 
-                    "Pritschet_articles" = round(c(pritschet.articles.jpsp.1990, pritschet.articles.jpsp.2000, pritschet.articles.jpsp.2010), digits = 2),
-                    "Pritschet_marg.sig.percent" = round(c(pritschet.marginal.jpsp.1990, pritschet.marginal.jpsp.2000, pritschet.marginal.jpsp.2010), digits = 2))
+#percentage of articles containing at least one marginally significant result Pritschet et al
+pritschet.marginal.jpsp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  pritschet.marginal.jpsp[year] <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 3 & dat3$dat3.Year == years[year]]) / 
+                                      pritschet.articles.jpsp[year]) }
 
-#pritschet developmental pscyhology
-  #Number of articles per year for developmental pyschology in Pritschet et al, NB! each row represents an article
-  pritschet.articles.dp.1990 <- nrow(dat3[dat3$dat3.Field == 2 & dat3$dat3.Year == 1990,])
-  pritschet.articles.dp.2000 <- nrow(dat3[dat3$dat3.Field == 2 & dat3$dat3.Year == 2000,])
-  pritschet.articles.dp.2010 <- nrow(dat3[dat3$dat3.Field == 2 & dat3$dat3.Year == 2010,])
+pritschet.marginal.dp <- rep(NA, 3)
+for (year in seq_along(years)) {
+  pritschet.marginal.dp[year] <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 2 & dat3$dat3.Year == years[year]]) / 
+                                      pritschet.articles.dp[year]) }
+    
+#dataframe pritschet et al
+df.pritschet <- data.frame("journal" = c(rep("JPSP",3), rep("Developmental Psychology",3)), "year" = rep(years, 2), 
+                  "Pritschet_articles" = round(c(pritschet.articles.jpsp, pritschet.articles.dp), digits = 2),
+                  "Pritschet_marg.sig.percent" = round(c(pritschet.marginal.jpsp, pritschet.marginal.dp), digits = 2))
 
-  #percentage of articles containing at least one marginally significant result in dp
-  pritschet.marginal.dp.1990 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 2 & dat3$dat3.Year == 1990]) / 
-                                         pritschet.articles.dp.1990)
-  pritschet.marginal.dp.2000 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 2 & dat3$dat3.Year == 2000]) / 
-                                         pritschet.articles.dp.2000)
-  pritschet.marginal.dp.2010 <- 100*(sum(dat3$dat3.Marginals.Yes.No[dat3$dat3.Field == 2 & dat3$dat3.Year == 2010]) / 
-                                        pritschet.articles.dp.2010)
-  #DP dataframe Pritschet et al
-  df.p2 <- data.frame("journal" = rep("Developmental Psychology",3), "year" = c(1990,2000,2010), 
-                    "Pritschet_articles" = round(c(pritschet.articles.dp.1990, pritschet.articles.dp.2000, pritschet.articles.dp.2010), digits = 2),
-                    "Pritschet_marg.sig.percent" = round(c(pritschet.marginal.dp.1990, pritschet.marginal.dp.2000, pritschet.marginal.dp.2010), digits = 2))
-
-#Merge dataframes
-df.pritschet <- rbind(df.p1, df.p2)
 
 ##Merge replication and Pritchet dataframes
 df.table.rep <- merge(df.pritschet, df.rep)
 
 #Write table
 #write.table(df.table.rep, file = "replication_table.txt")
+
 View(df.table.rep)
 #-------------------------------------------------------
 ##Table for subfields and overall
