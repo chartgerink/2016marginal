@@ -3,10 +3,8 @@
 #-----------------------------------------------------
 ##Startup
 #----------------------------------------------------
-#Set working directory
-
 #Load dataset
-dat <- read.csv("marginal_dataset.csv", stringsAsFactors = FALSE, strip.white = TRUE)
+dat <- read.csv("../data/marginal_dataset.csv", stringsAsFactors = FALSE, strip.white = TRUE)
 #Force dat$value into a numeric variable
 dat$value <- as.numeric(dat$value)
 #Remove scientific notation
@@ -176,7 +174,7 @@ topics <- read.csv2("apa_topics_dummies.csv", header = TRUE, stringsAsFactors = 
 dat <- merge(dat, topics, by = "journal")
 
 #Save finished dataset
-write.csv(dat, file = "cleaned_full_marginal_dataset.csv", row.names = F)
+write.csv(dat, file = "../data/cleaned_full_marginal_dataset.csv", row.names = F)
 
 #-------------------------------------------------------
 ##Create dataset with only values between .05 < p <= .1
@@ -188,9 +186,7 @@ dat.marginal <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparis
 dat.marginal$marginal <- grepl("marginal|approach", dat.marginal$pre) | grepl("marginal|approach", dat.marginal$post)
 
 #Save finished dataset
-write.csv(dat.marginal, file = "cleaned_restrictedp_marginal_dataset.csv", row.names = F)
+write.csv(dat.marginal, file = "../data/cleaned_restrictedp_marginal_dataset.csv", row.names = F)
 
-#Note that there is one journal that apparently does not contain any p-values between .05 and .1
-setdiff(unique(dat.marginal$journal), unique(dat$journal))
 #----------------------------------------------------
 

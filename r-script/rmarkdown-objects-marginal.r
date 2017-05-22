@@ -3,14 +3,12 @@
 #------------------------------------------
 ##Startup
 #------------------------------------------
-#Set working directory
-
 #load the full cleaned dataset with added topics
-dat <- read.csv("cleaned_full_marginal_dataset.csv", stringsAsFactors = FALSE)
+dat <- read.csv("../data/cleaned_full_marginal_dataset.csv", stringsAsFactors = FALSE)
 
 #Restricted dataset
 dat2 <- dat[dat$value > 0.05 & dat$value <= 0.1,]
-dat2 <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparison == ">"),]
+dat2 <- dat2[!(dat2$value == 0.1 & dat2$comparison == ">"),]
 #Add a variable indicating whether a p-value appears to reported as marginally significant to restricted dataset
 dat2$marginal <- grepl("marginal|approach", dat2$pre) | grepl("marginal|approach", dat2$post)
 
@@ -68,7 +66,7 @@ for (year in seq_along(years)) {
                       length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == years[year]])) }
    
 #Data frame of replication data
-df.rep <- data.frame("journal" = c(rep("JPSP",3), rep("Developmental Psychology",3)), "year" = rep(years,2), 
+df.rep <- data.frame("journal" = c(rep("JPSP",3), rep("DP",3)), "year" = rep(years,2), 
                   "rep_articles" = c(a.jpsp, a.dp), 
                   "rep_p-values.per.article" = round(c(results.jpsp, results.dp), digits = 2),
                   "rep_percent.05.p.1" = round(c(p.jpsp, p.dp), digits = 2), 
@@ -76,7 +74,7 @@ df.rep <- data.frame("journal" = c(rep("JPSP",3), rep("Developmental Psychology"
 
 
 #Load data from Pritschet et al
-  dat3 <- read.csv("marginals psych science revision_corrections.csv", stringsAsFactors = FALSE)
+  dat3 <- read.csv("../data/marginals_psych_science_revision_corrections.csv", stringsAsFactors = FALSE)
   #Resaved the file as .csv, will have to look up how to open a .xlsx another day
   dat3 <- dat3[dat3$Year == 1990 | dat3$Year == 2000 | dat3$Year == 2010, ]
   dat3 <- dat3[dat3$Field == 2 | dat3$Field == 3,]
@@ -104,7 +102,7 @@ for (year in seq_along(years)) {
                                       pritschet.articles.dp[year]) }
     
 #dataframe pritschet et al
-df.pritschet <- data.frame("journal" = c(rep("JPSP",3), rep("Developmental Psychology",3)), "year" = rep(years, 2), 
+df.pritschet <- data.frame("journal" = c(rep("JPSP",3), rep("DP",3)), "year" = rep(years, 2), 
                   "Pritschet_articles" = round(c(pritschet.articles.jpsp, pritschet.articles.dp), digits = 2),
                   "Pritschet_marg.sig.percent" = round(c(pritschet.marginal.jpsp, pritschet.marginal.dp), digits = 2))
 
@@ -217,4 +215,22 @@ df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitiv
                                                          marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2))
                                                            
 View(df.subfields)                                 
-#------------------------------------------------------------------
+#------------------------------------------
+##List of objects for r-markdown file
+#------------------------------------------
+#Load original dataset
+original <- read.csv("../data/marginal_dataset.csv", stringsAsFactors = FALSE, strip.white = TRUE)
+#Force dat$value into a numeric variable
+original$value <- as.numeric(original$value)
+
+#"original" = original full dataset without trimming, "dat" = full dataset with nodoi and missing p-values removed + journal names corrected + metadata and topics added, 
+#"dat2" = "dat" but only entries with .05 < p <= .1, "dat3" = data from Pritschet et al
+
+marginal_list <- list(entries.original = nrow(original), nodoi = sum(grepl("nodoi", original$doi)), nodoipercent = 100*(signif(sum(grepl("nodoi", original$doi))/nrow(original), digits = 2)),
+                      badp = sum(is.na(original$value)), badppercent = 100*(signif(sum(is.na(original$value))/nrow(original), digits = 2)), entries.final = length(dat2$result), 
+                      entries.finalpercent = 100*(signif(length(dat2$result) / length(dat$result), digits = 2)), articles.final = length(unique(dat2$doi)), 
+                      articles.finalpercent = 100*(signif(length(unique(dat2$doi))/length(unique(dat$doi)), digits = 2)), journals.final = length(unique(dat2$journal)), 
+                      difjournals = setdiff(unique(dat$journal), unique(dat2$journal)), tablerep = df.table.rep, tablesubfields = df.subfields)
+
+saveRDS(marginal_list, file = "../writing/marginal_rmarkdown_objects.RData")
+

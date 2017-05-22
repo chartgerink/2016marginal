@@ -1,10 +1,8 @@
 ##Analysis of test-sample FYP 2017
 
 #----------------------------------
-#set working directory
-
 #Load dataset
-dat <- read.csv("test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)
+dat <- read.csv("../data/test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)
 
 #---------------------------------------------------------------------
 ##Datasets with proportion of marginal results per year for different subfield

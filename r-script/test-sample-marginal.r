@@ -3,14 +3,12 @@
 #------------------------------------------------------
 #Creation of stratified sample (by journal)
 #------------------------------------------------------
-#Set working directory
-
 #Load required package
 if(!require("splitstackshape")){install.packages("splitstackshape")}
 library(splitstackshape)
 
 #load data file
-dat.marginal <- read.csv("cleaned_restrictedp_marginal_dataset.csv", stringsAsFactors = F)
+dat.marginal <- read.csv("../data/cleaned_restrictedp_marginal_dataset.csv", stringsAsFactors = F)
 
 sort(table(dat.marginal$journal))
 #5 journals have 4 or fewer rows in the dataframe, and we would have to sample a prohibitively large proportion
@@ -25,6 +23,6 @@ stratified.sample <- stratified(dat.marginal, "journal", 0.06)
 #---------------------------------------------
 ##Save finished dataset
 #---------------------------------------------
-write.csv(stratified.sample, file = "test_sample_marginal_dataset.csv", row.names = F)
+write.csv(stratified.sample, file = "../data/test_sample_marginal_dataset.csv", row.names = F)
 
 #-------------------------------------------------------
