@@ -1,26 +1,40 @@
 ---
-title: "Method"
-author: "Anton Ohsson Collentine"
-date: "April 25, 2017"
-output: html_document
-bibliography: ../bibliography/bibliography-FYP.bib
+output: pdf_document
+bibliography: ../bibliography/bibliography-marginal.bib
 csl: ../bibliography/apa.csl
-figs: .../figures
 ---
-
-##Method
-###Sample
-The sample consisted of a large number of p-values extracted from articles published by journals belonging to the American Psychological Association (APA) between 1985 - 2016. C. Hartgerink previously extracted 74,489 articles from different APA-journals between 1985-2016, which were used as a basis for the current project [@10.3390/data1030014]. Since only articles in HTML format were collected, the time span for data from any given journal depended on from what year articles in each journal were available in HTML format. In addition, though @10.3390/data1030014 collected data from several different publishers, only data from journals belonging to the APA was used in the current project due to ready access to this particular data. After cleaning (see 'data' section), the final sample consisted of 50,891 p-values, originating from 19,875 articles in 73 different journals.
-
-###Data
-Extracted data was cleaned, subfield categories added, and a subsample for testing and pre-registration purposes created (figure 1). From the articles provided by @10.3390/data1030014 790,206 p-values were extracted. According to @10.3758/s13428-015-0664-2 the vast majority of researchers (94.3%) consider $p = .05$ as significant, and as such we limited our sample to $p > .05$. In addition, @10.1177/0956797616645672, in an subanalysis of the distribution of p-values, report a sharp drop in p-values reported as marginally significant above $p = .1$, and we therefore used as an upper limit $p <= .1$. Approximately 6.4% of all extracted p-values fell between these values ($.05 < p <= .1$). Prior to this process, we removed a small number of entries (1,124) from the dataset because of misreporting or extraction-failure, although this number does not include p-values that were misreported as too high (_e.g._ $p = 1.0$ instead of $p = .10$) or as possible p-values (_e.g._ $p = .99$ instead of $p = .099$). However, according to @10.3758/s13428-015-0664-2, misreporting occurs for only about .97% of nonsignificant p-values (defined as $p > .05$). Our categorization of journals into different subfields is taken from the APA's ([www.apa.org](www.apa.org)) division of their journals into 'topics'. Note, however, that the APA allows the possibility of a journal belonging to several subfields. A full list of which journals were included in which subfields can be found in appendix A. Finally, a stratified random sample (by journal) was taken from the finished dataset. For a more detailed walkthrough of the data preparation, refer to appendix B.
-
-```{r flowchart, fig.cap="_Figure 1._ Flowchart illustrating the data cleaning process.", out.width="60%", out.height="60%", fig.align="center", echo = FALSE}
-knitr::include_graphics("C:/Users/Anton2/Dropbox/Tilburg/FYP/figures/flowchart_marginal.png", auto_pdf = TRUE)
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.height=4, echo=FALSE, warning=FALSE, message=FALSE)
+options(knitr.table.format = "latex") 
+```
+```{r r_objects}
+marginal <- readRDS("./marginal_rmarkdown_objects.RData")
 ```
 
+##Method
+In the current project, we made use of a large number of APA articles provided by @10.3390/data1030014. @10.3390/data1030014 previously downloaded 74,489 articles published between 1985 and 2016 from 74 journals belonging to the APA, corresponding to about `r signif(100*(74/93), digits = 2)`% of currently exisiting APA journals (see appendix A for a list of all APA journals included and not included in the project). Though @10.3390/data1030014 collected data from several different publishers, we only used data from journals belonging to the APA, since the APA conveniently divides their journals into subfields, or 'topics' @APAjournals. A journal may publish on several topics, and a full list of which journals were included in which subfields can be found in appendix A. Finally, @10.3390/data1030014 only downloaded articles in HTML format, meaning that the time span for data from any particular journal depended on from what year articles in each journal were available in HTML format, and did not always correspond to the full period of 1985-2016. 
+
+Downloaded HTML articles were converted to text format, and p-values with surrounding text extracted. We converted HTML articles to raw text format using the python tool 'html2text', and subsequently extracted the following information from each article using regular expressions: DOI (when available), raw text of the p-values (_e.g._ "$p=.048$"), sign of the p-value comparison ('>','<' or '='), the p-value itself, and finally the 200 characters immediately before the reported p-value, and the 200 characters immediately following. This data we collated into one large dataset containing `r marginal$entries.original` entries. 
+
+```{r flowchart, fig.cap="_Figure 1._ Flowchart illustrating the data cleaning process.", echo = FALSE}
+knitr::include_graphics("../figures/flowchart_marginal.png", auto_pdf = TRUE)
+```
+
+###Data
+Extracted data was cleaned, subfield categories added, and a subsample for testing and pre-registration purposes created (figure 1). From the articles provided by @10.3390/data1030014 `r marginal$entries.original` p-values were extracted. From this dataset we removed a small number of entries (n = `r marginal$nodoi`, `r marginal$nodoipercent`% of total) lacking DOI (and journal name/year), and all rows (n = `r marginal$badp`, `r marginal$badppercent`% of total) where the p-values were not numerical (_e.g._ equal to '.'). This does not include p-values that were misreported as too high (_e.g._ $p = 1.2$ instead of $p = .12$) or as possible p-values (_e.g._ $p = .99$ instead of $p = .099$). However, according to @10.3758/s13428-015-0664-2, misreporting occurs for only about .97% of nonsignificant p-values (defined as $p > .05$). Missing metadata (years and journal name) for `r marginal$mis.meta` (`r marginal$mis.metapercent`% of total) entries was retrieved from Crossref using the r-package 'rcrossref', and journal names were standardized for all entries, with older journal names updated to their current (2017) APA-names as per Appendix A, before adding subfield categories for each journal. Finally, the dataset was limited to p-values $.05 < p <= .1$, resulting in a final sample consisting of `r marginal$entries.final` (`r marginal$entries.finalpercent`% of total) p-values, originating from `r marginal$articles.final` (`r marginal$articles.finalpercent`%) articles in `r marginal$journals.final` different journals. One journal, the '`r marginal$difjournals`', did not contain any p-values between .05 and .1. A stratified random sample (by journal) of about 6% was taken from the finished dataset for testing code for pre-registration. Table 1 summarizes our data per subfield. To determine whether a result was reported as marginally significant, we searched the 200 characters preceding and succeeding a given p-value for strings containing "marginal" and "approach", and considered the p-value to be reported as marginally significant if either of those strings was found. The second and third parts of the table compare our data with that of @10.1177/0956797616645672 on those points where such a comparison is possible.
+
+```{r table_1}
+library(knitr)
+library(kableExtra)
+
+kable(marginal$table, caption = "Table 1", booktabs = T, align = "c", col.names = c("Field", "Journals/year", "Articles", "P-values (per article)", 
+                                 ".05 < p <= .1 (per article)", "Marg. sig. (%)")) %>%
+  kable_styling(bootstrap_options = "condensed") %>%
+  group_rows("Other data", 11, 16) %>%
+  group_rows("Our data", 17, 22)
+```
 
 ###Analysis
-We describe the percentage of p-values ($.05 < p <= .1$) reported as marginally significant in a population of APA journals, overall and by subfields. We extracted p-values and surrounding information from the full-text of 19,875 articles from 1985-2016. Due to the size and non-random nature of our sample we consider it our population of interest and report only descriptive statistics. To determine whether a result was reported as marginally significant, we searched the 200 characters preceding and succeeding a given p-value for strings containing "marginal" and "approach", and considered the p-value to be reported as marginally significant if either of those strings was found. For the analyses the extracted p-values were aggregated by subfield and overall. Finally, to facilitate interpretation we estimated linear trends and report regression coefficients, as well as proportion of variance explained.
+We describe the percentage of p-values ($.05 < p <= .1$) reported as marginally significant over the years in a population of APA journals, overall and by subfields. Due to the size and non-random nature of our sample we consider it our population of interest and report only descriptive statistics. This precludes the need to consider dependencies, and as such we disaggregated all extracted p-values before analyzing them by subfield and overall. To facilitate interpretation we estimated linear trends, and report regression coefficients as well as proportion of variance explained. All analytic code was first run on a test-sample consisting of 6% of the p-values and then pre-registered.
 
 ##References
