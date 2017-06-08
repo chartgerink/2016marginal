@@ -1,9 +1,9 @@
 ---
-title: 'Appendix A: Subfields and Journals'
+title: 'Appendix A: Topics (subfields) and journals'
 output: word_document
 ---
 
-###Basic / Experimental Psychology (19)
+###"Basic / Experimental Psychology" (experimental psychology) - 19 journals
 - Behavioral Neuroscience
 - Canadian Journal Of Experimental Psychology
 - Decision
@@ -24,7 +24,7 @@ output: word_document
 - Psychology Of Popular Media Culture
 - Psychomusicology: Music, Mind, And Brain
 
-###Clinical Psychology (30)
+###"Clinical Psychology" (clinical psychology) - 30 journals
 - American Journal Of Orthopsychiatry
 - Clinical Practice In Pediatric Psychology
 - Couple And Family Psychology: Research And Practice
@@ -56,7 +56,7 @@ output: word_document
 - Sport, Exercise, And Performance Psychology
 - Training And Education In Professional Psychology
 
-###Core of Psychology (9)
+###"Core of Psychology" (NA) - 9 journals
 - American Psychologist
 - Canadian Psychology
 - History Of Psychology
@@ -67,7 +67,7 @@ output: word_document
 - Psychological Review
 - Review Of General Psychology
 
-###Developmental Psychology (8)
+###"Developmental Psychology" (developmental psychology) -  8 journals
 - Canadian Journal Of Behavioural Science
 - Clinical Practice In Pediatric Psychology
 - Cultural Diversity & Ethnic Minority Psychology
@@ -77,7 +77,7 @@ output: word_document
 - Psychoanalytic Psychology
 - Psychology Of Men & Masculinity
 
-###Educational Psychology, School Psychology & Training (10)
+###"Educational Psychology, School Psychology & Training" (educational psychology) - 10 journals
 - Canadian Journal Of Behavioural Science
 - Developmental Psychology
 - Journal Of Counseling Psychology
@@ -89,13 +89,13 @@ output: word_document
 - School Psychology Quarterly
 - Training And Education In Professional Psychology
 
-###Forensic Psychology (4)
+###"Forensic Psychology" (forensic psychology) - 4 journals
 - Journal Of Threat Assessment And Management
 - Law And Human Behavior
 - Psychological Assessment
 - Psychology, Public Policy, And Law
 
-###Health Psychology & Medicine (25)
+###"Health Psychology & Medicine" (health psychology) - 25 journals
 - Clinical Practice In Pediatric Psychology
 - Cultural Diversity & Ethnic Minority Psychology
 - Experimental And Clinical Psychopharmacology
@@ -122,7 +122,7 @@ output: word_document
 - Sport, Exercise, And Performance Psychology
 - Stigma And Health
 
-###Industrial/Organizational Psychology & Management (13)
+###"Industrial/Organizational Psychology & Management" (organizational psychology) - 13 journals
 - Consulting Psychology Journal: Practice And Research
 - Group Dynamics: Theory, Research, And Practice
 - International Journal Of Stress Management
@@ -137,7 +137,7 @@ output: word_document
 - Rehabilitation Psychology
 - Review Of General Psychology
 
-###Neuroscience & Cognition (10)
+###"Neuroscience & Cognition" (cognitive psychology) - 10 journals
 - Behavioral Neuroscience
 - Canadian Journal Of Experimental Psychology
 - Decision
@@ -149,7 +149,7 @@ output: word_document
 - Psychology Of Aesthetics, Creativity, And The Arts
 - Psychomusicology: Music, Mind, And Brain
 
-###Social Psychology & Social Processes (25)
+###"Social Psychology & Social Processes" (social psychology) - 25 journals
 - American Journal Of Orthopsychiatry
 - Canadian Journal Of Behavioural Science
 - Canadian Psychology
@@ -176,12 +176,12 @@ output: word_document
 - Psychology Of Violence
 - Psychology, Public Policy, And Law
 
-###Journals of the American Psychological Association not in the sample (18)
+###Journals of the American Psychological Association not in the sample (NA) - 18 journals
 - Archives of Scientific Psychology
 - Asian American Journal of Psychology
 - Behavior Analysis: Research and Practice
 - Behavioral Development Bulletin
--Clinician's Research Digest: Adult Populations
+- Clinician's Research Digest: Adult Populations
 - Clinician's Research Digest: Child and Adolescent Populations
 - Contemporary Psychology: APA Review of Books
 - Families, Systems, & Health

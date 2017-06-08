@@ -1,6 +1,7 @@
 ##Analysis of test-sample FYP 2017
 
 #----------------------------------
+
 #Load dataset
 dat <- read.csv("../data/test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)
 
@@ -30,12 +31,6 @@ clinical.sum <- merge(aggregate(result ~ year, data = dat[dat$Clinical.Psycholog
                       aggregate(marginal ~ year, data = dat[dat$Clinical.Psychology == 1,], FUN = sum), by = "year")
 
 clinical.sum$percentage.marginal <- 100*(clinical.sum$marginal/clinical.sum$result)
-
-#core of psychology
-core.sum <- merge(aggregate(result ~ year, data = dat[dat$Core.of.Psychology == 1,], FUN = length),
-                  aggregate(marginal ~ year, data = dat[dat$Core.of.Psychology == 1,], FUN = sum), by = "year")
-
-core.sum$percentage.marginal <- 100*(core.sum$marginal/core.sum$result)
 
 #Developmental psychology
 developmental.sum <- merge(aggregate(result ~ year, data = dat[dat$Developmental.Psychology == 1,], FUN = length),
@@ -150,28 +145,6 @@ library(scales)
           axis.text = element_text(size = 9), 
           panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
   
-#core of psychology
-  
-  #Statistics to label graph with
-  core.stat <- bquote(list(b == .(round(summary(lm(core.sum$percentage.marginal ~ core.sum$year))$coefficients[2,1], digits = 2)), 
-                               R^2 == .(round(summary(lm(core.sum$percentage.marginal ~ core.sum$year))$r.squared, digits = 2)))) 
-  
-  #Plot
-  p4 <- ggplot(core.sum, aes(x = year, y = percentage.marginal)) +
-    geom_point() + 
-    geom_line() +
-    geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
-               label.padding = unit(0.12, "lines"), parse = TRUE, label = deparse(core.stat)) +
-    scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-    scale_y_continuous(name = expression(atop(paste("% of .05 < ",italic("p"), " <= .1 reported as"), 
-                                              paste("marginally significant"))), limits = c(0,100))+
-    ggtitle("Core") +
-    theme(plot.title = element_text(size = 9), 
-          axis.title = element_text(size = 9), 
-          axis.text = element_text(size = 9), 
-          panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
-  
-  
 #Developmental psychology
   
   #Statistics to label graph with
@@ -179,7 +152,7 @@ library(scales)
                            R^2 == .(round(summary(lm(developmental.sum$percentage.marginal ~ developmental.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p5 <- ggplot(developmental.sum, aes(x = year, y = percentage.marginal)) +
+  p4 <- ggplot(developmental.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -201,7 +174,7 @@ library(scales)
                                     R^2 == .(round(summary(lm(educational.sum$percentage.marginal ~ educational.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p6 <- ggplot(educational.sum, aes(x = year, y = percentage.marginal)) +
+  p5 <- ggplot(educational.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -222,7 +195,7 @@ library(scales)
                                    R^2 == .(round(summary(lm(experimental.sum$percentage.marginal ~ experimental.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p7 <- ggplot(experimental.sum, aes(x = year, y = percentage.marginal)) +
+  p6 <- ggplot(experimental.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -243,7 +216,7 @@ library(scales)
                                   R^2 == .(round(summary(lm(forensic.sum$percentage.marginal ~ forensic.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p8 <- ggplot(educational.sum, aes(x = year, y = percentage.marginal)) +
+  p7 <- ggplot(educational.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -264,7 +237,7 @@ library(scales)
                                R^2 == .(round(summary(lm(health.sum$percentage.marginal ~ health.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p9 <- ggplot(health.sum, aes(x = year, y = percentage.marginal)) +
+  p8 <- ggplot(health.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -286,7 +259,7 @@ library(scales)
                                      R^2 == .(round(summary(lm(organizational.sum$percentage.marginal ~ organizational.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p10 <- ggplot(organizational.sum, aes(x = year, y = percentage.marginal)) +
+  p9 <- ggplot(organizational.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -307,7 +280,7 @@ library(scales)
                              R^2 == .(round(summary(lm(social.sum$percentage.marginal ~ social.sum$year))$r.squared, digits = 2)))) 
   
   #Plot
-  p11 <- ggplot(social.sum, aes(x = year, y = percentage.marginal)) +
+  p10 <- ggplot(social.sum, aes(x = year, y = percentage.marginal)) +
     geom_point() + 
     geom_line() +
     geom_label(size = 3, x = 1985, y = 100, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
@@ -326,7 +299,7 @@ library(scales)
 #-------------------------------------------------------
   
 #Developmental, social, and cognitive psychology
-plot_grid(p5, p11, p3, nrow = 1, ncol = 3) 
+plot_grid(p4, p10, p3, nrow = 1, ncol = 3) 
 
 #All journals, and remaining subfields
-plot_grid(p1, p2, p4, p6, p7, p8, p9, p10)
+plot_grid(p1, p2, p5, p6, p7, p8, p9)

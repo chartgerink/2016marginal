@@ -132,7 +132,7 @@ df.pritschet <- data.frame("Field" = c(rep("JPSP",3), rep("DP",3)), "Journals.ye
 
 ##Merge replication and Pritchet dataframes
 
-df.table <- rbind(df.pritschet, df.rep)
+df.table <- rbind(df.rep, df.pritschet)
 
 View(df.table)
 #-------------------------------------------------------
@@ -191,12 +191,11 @@ marg.social <- 100*(sum(dat2$marginal[dat2$Social.Psychology...Social.Processes 
 
 
 #Dataframe for table
-df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Core", "Developmental", "Educational",
+df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Developmental", "Educational",
                                           "Experimental", "Forensic", "Health", "Organizational", "Social"), 
                            "Journals.year" = c(length(unique(dat$journal)), 
                                           length(unique(dat$journal[dat$Clinical.Psychology == 1])), 
-                                          length(unique(dat$journal[dat$Neuroscience...Cognition == 1])), 
-                                          length(unique(dat$journal[dat$Core.of.Psychology == 1])), 
+                                          length(unique(dat$journal[dat$Neuroscience...Cognition == 1])),
                                           length(unique(dat$journal[dat$Developmental.Psychology == 1])), 
                                           length(unique(dat$journal[dat$Educational.Psychology..School.Psychology...Training == 1])),
                                           length(unique(dat$journal[dat$Basic...Experimental.Psychology == 1])), 
@@ -206,8 +205,7 @@ df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitiv
                                           length(unique(dat$journal[dat$Social.Psychology...Social.Processes == 1]))),
                             "Articles" = c(length(unique(dat$doi)), 
                                           length(unique(dat$doi[dat$Clinical.Psychology == 1])), 
-                                          length(unique(dat$doi[dat$Neuroscience...Cognition == 1])), 
-                                          length(unique(dat$doi[dat$Core.of.Psychology == 1])),
+                                          length(unique(dat$doi[dat$Neuroscience...Cognition == 1])),
                                           length(unique(dat$doi[dat$Developmental.Psychology == 1])),
                                           length(unique(dat$doi[dat$Educational.Psychology..School.Psychology...Training == 1])),
                                           length(unique(dat$doi[dat$Basic...Experimental.Psychology == 1])),
@@ -218,7 +216,6 @@ df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitiv
                             "P-values.and.per.article" = c(paste0(length(dat$result), " (",p.per.article.overall, ")"), 
                                            paste0(length(dat$result[dat$Clinical.Psychology == 1]), " (",p.per.article.clinical, ")"), 
                                            paste0(length(dat$result[dat$Neuroscience...Cognition == 1]), " (",p.per.article.cognitive, ")"),
-                                           paste0(length(dat$result[dat$Core.of.Psychology == 1]), " (",p.per.article.core, ")"),
                                            paste0(length(dat$result[dat$Developmental.Psychology == 1]), " (",p.per.article.developmental, ")"), 
                                            paste0(length(dat$result[dat$Educational.Psychology..School.Psychology...Training == 1]), " (",p.per.article.educational, ")"),
                                            paste0(length(dat$result[dat$Basic...Experimental.Psychology == 1]), " (",p.per.article.experimental, ")"),
@@ -229,7 +226,6 @@ df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitiv
                             "0.05.p.0.1.and.per.article" = c(paste0(length(dat2$result), " (", p.limited.overall, ")"),
                                                      paste0(length(dat2$result[dat2$Clinical.Psychology == 1]), " (", p.limited.clinical, ")"),
                                                      paste0(length(dat2$result[dat2$Neuroscience...Cognition == 1]), " (", p.limited.cognitive, ")"),
-                                                     paste0(length(dat2$result[dat2$Core.of.Psychology == 1]), " (", p.limited.core, ")"),
                                                      paste0(length(dat2$result[dat2$Developmental.Psychology == 1]), " (", p.limited.developmental, ")"),
                                                      paste0(length(dat2$result[dat2$Educational.Psychology..School.Psychology...Training == 1]), " (", p.limited.educational, ")"),
                                                      paste0(length(dat2$result[dat2$Basic...Experimental.Psychology == 1]), " (", p.limited.experimental, ")"),
@@ -237,7 +233,7 @@ df.subfields <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitiv
                                                      paste0(length(dat2$result[dat2$Health.Psychology...Medicine == 1]), " (", p.limited.health, ")"),
                                                      paste0(length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]), " (", p.limited.organizational, ")"),
                                                      paste0(length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]), " (", p.limited.social, ")")),
-                           "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.core, marg.developmental, marg.educational,
+                           "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
                                                          marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2))
 
 
