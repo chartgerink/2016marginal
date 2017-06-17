@@ -183,7 +183,7 @@ dat.marginal <- dat[dat$value > 0.05 & dat$value <= 0.1,]
 dat.marginal <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparison == ">"),]
 
 #Add a variable indicating whether a p-value appears to reported as marginally significant
-dat.marginal$marginal <- grepl("marginal|approach", dat.marginal$pre) | grepl("marginal|approach", dat.marginal$post)
+dat.marginal$marginal <- grepl("margin|approach", dat.marginal$pre)
 
 #Save finished dataset
 write.csv(dat.marginal, file = "../data/cleaned_restrictedp_marginal_dataset.csv", row.names = F)
