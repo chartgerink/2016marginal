@@ -168,7 +168,7 @@ dat$journal <- gsub("Psychotherapy: Theory, Research, Practice, Training", "Psyc
 dat$journal <- gsub("Theoretical & Philosophical Psychology", "Journal of Theoretical and Philosophical Psychology", dat$journal)
 
 #load file with journal names and APA-topics
-topics <- read.csv2("apa_topics_dummies.csv", header = TRUE, stringsAsFactors = FALSE, strip.white = TRUE)
+topics <- read.csv2("../data/apa_topics_dummies.csv", header = TRUE, stringsAsFactors = FALSE, strip.white = TRUE)
 
 #Merge with main dataframe
 dat <- merge(dat, topics, by = "journal")
@@ -183,7 +183,7 @@ dat.marginal <- dat[dat$value > 0.05 & dat$value <= 0.1,]
 dat.marginal <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparison == ">"),]
 
 #Add a variable indicating whether a p-value appears to reported as marginally significant
-dat.marginal$marginal <- grepl("margin|approach", dat.marginal$pre)
+dat.marginal$marginal <- grepl("margin|approach", dat.marginal$pre) | grepl("margin|approach", dat.marginal$post)
 
 #Save finished dataset
 write.csv(dat.marginal, file = "../data/cleaned_restrictedp_marginal_dataset.csv", row.names = F)
