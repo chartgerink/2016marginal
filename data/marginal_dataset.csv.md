@@ -1,0 +1,1 @@
+doi: DOI of article p-value was extracted from journal: name of journal article was published in year: year article was published pre: 200 characters preceding the p-value result: p comparison sign and value post: 200 characters succeeding the p-value comparison: comparison sign of the p-value [=/>/<] value: numerical value of the p-value
