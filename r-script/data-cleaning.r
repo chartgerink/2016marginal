@@ -179,16 +179,18 @@ write.csv(dat, file = "../data/marginal_dataset_with_subfields.csv", row.names =
 #-------------------------------------------------------
 ##Create dataset with only values between .05 < p <= .1
 #------------------------------------------------------
+#Exclude any remaining entries unique to the topic 'core of psychology'
+dat.marginal <- dat.marginal[dat.marginal$Social.Psychology...Social.Processes == 1 | dat.marginal$Neuroscience...Cognition == 1 | dat.marginal$Industrial.Organizational.Psychology...Management == 1 |
+                      dat.marginal$Health.Psychology...Medicine == 1 | dat.marginal$Forensic.Psychology  == 1 | dat.marginal$Educational.Psychology..School.Psychology...Training == 1 |
+                      dat.marginal$Developmental.Psychology == 1 | dat.marginal$Clinical.Psychology == 1 | dat.marginal$Basic...Experimental.Psychology == 1,]
+
+
 dat.marginal <- dat[dat$value > 0.05 & dat$value <= 0.1,]
 dat.marginal <- dat.marginal[!(dat.marginal$value == 0.1 & dat.marginal$comparison == ">"),]
 
 #Add a variable indicating whether a p-value appears to reported as marginally significant
 dat.marginal$marginal <- grepl("margin|approach", dat.marginal$pre) | grepl("margin|approach", dat.marginal$post)
 
-#Exclude any remaining entries unique to the topic 'core of psychology'
-dat.marginal <- dat.marginal[dat.marginal$Social.Psychology...Social.Processes == 1 | dat.marginal$Neuroscience...Cognition == 1 | dat.marginal$Industrial.Organizational.Psychology...Management == 1 |
-                      dat.marginal$Health.Psychology...Medicine == 1 | dat.marginal$Forensic.Psychology  == 1 | dat.marginal$Educational.Psychology..School.Psychology...Training == 1 |
-                      dat.marginal$Developmental.Psychology == 1 | dat.marginal$Clinical.Psychology == 1 | dat.marginal$Basic...Experimental.Psychology == 1,]
 
 #Save finished dataset
 write.csv(dat.marginal, file = "../data/final_marginal_dataset.csv", row.names = F)

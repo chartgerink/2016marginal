@@ -1,0 +1,41 @@
+---
+output: word_document
+bibliography: ../bibliography/bibliography-marginal.bib
+csl: ../bibliography/apa.csl
+figures: yes
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.height=4, echo=FALSE, warning=FALSE, message=FALSE)
+```
+```{r r_objects}
+marginal <- readRDS("./marginal_rmarkdown_objects.RData")
+```
+
+#Discussion and conclusion
+We re-examined @10.1177/0956797616645672's claims regarding the journals JPSP and DP. @10.1177/0956797616645672 reported that 'marginally significant' results were more prevalent in JPSP than in DP and that for both journals there was an increasing trend over the years. Our results indicate that the percentage of 'marginally significant' results is indeed higher in JPSP (`r marginal$marg.jpsp`%) than in DP (`r marginal$marg.dp`%). They also show a positive trend for JPSP (_b_ = 0.28, _r²_ = .22) between 1985 and 2016. The trend for DP, however, is negative (_b_ = -0.15, _r²_ = .05).
+
+Our results are from data of 32 consecutive years, whereas @10.1177/0956797616645672 only examined 5 years for each journal. Our dataset includes three of these years (1990, 2000, 2010), highlighted in Figure 2. It is evident from Figure 2 that choosing to only examine a few select years may lead to spurious trend estimates due to the high variance in percent 'marginally significant' results across the years. Thus @10.1177/0956797616645672's trend estimate for DP is contrary to our estimate of its overall trend, though as luck would have it their estimate for JPSP is in the same direction.
+
+It is also problematic that @10.1177/0956797616645672 used only one journal each to represent entire psychological disciplines. While the trend of DP (_b_ = -0.15, _r²_ = .05) is similar to that of its discipline (developmental psychology; _b_ = -0.12, _r²_ = .05), the trend of JPSP (_b_ = 0.28, _r²_ = .22) goes in the opposite direction of its discipline (social psychology; _b_ = -0.02, _r²_ = 0).
+```{r hankins}
+b <- read.csv("../data/hankins.csv", stringsAsFactors = F)
+b$marg <- grepl("margin|approach", b$X.barely..not.statistically.significant..p.0.052.)
+```
+We examined the prevalence of 'marginally significant' results in 9 psychlogical disciplines with data from 70 different APA-journals. Each discipline was made up of between 4 to 30 journals and included data from every year between 1985 and 2016. Contrary to the claims of @10.1177/0956797616645672 all disciplines described a downward trend in the percentage of results reported as marginally significant. However, overall almost 40% of _p_-values between .05 and .1 are described as 'marginally significant', with averages of above 30% in every discipline. Even a more conservative estimate gives an overall average of 32% and averages for every psychological discipline of above 24%. Whatsmore, these are likely underestimates. Matthew @Hankins has compiled a list of `r nrow(b)` ways that researchers have described results as marginally significant; only `r sum(b$marg)` include the expressions "margin\*" or "approach\*", our indicators of 'marginal significance'.
+
+It is unsurprising that many researchers are uncertain of how to interpret _p_-values just above the significance level. The decision rules used in the NHST statistics dominant in psychology are a mish-mash of Fisher's and Neyman-Pearson's ideas [@10.1016/j.socec.2004.09.033]. The conflation of decision rules and the perceived importance of achieving 'significant' results thus creates uncertainty for many when a result is close to, but does not cross below, the significance threshold. 
+
+The degree to which reporting results as marginally significant is problematic depends largely on individual interpretation. Questionable Research Practices (QRPs) are practices which inflate the risk of false positive results [@10.1177/0956797611430953]. One of a multitude of such practices is the post-hoc decision to change what decision rule one uses, or how strictly it is applied [@10.3389/fpsyg.2016.01832]. Since most psychological researchers are likely to use a pre-defined alpha level, later reporting results as marginally significant is an example of a changing decision rule. The severity of this practice depends on to what extent the decision rule has been altered, i.e. the researcher's interpretation of the results. 
+
+##Conclusion
+The large percentages of 'marginally significant' results in psychology should be of concern. These represent that a large portion of researchers at best are uncertain of how to interpret their results, or at worst purposefully overinterpret their results due to concerns about publicability. There have been some recent efforts to change decision rules that might improve the situation, e.g. suggestions to remove the significance threshold [@10.7717/peerj.3544] or lower it [@osf.io/preprints/psyarxiv/mky9j]. Regardless of the solution, a clarification of decision rules seems desirable. Yet, while percentages are high, they are also decreasing across the board in psychology. Moreover, that results from (well-designed) studies are published further the scientific endeavour (through e.g. meta-analyses) regardless of the individual researcher's interpretation of results as 'marginal' or not. Thus we end cautiously optimistic in regards to the subject of 'marginally significant' results in psychology.
+
+#Acknowledgements
+I thank my supervisors Marcel van Assen and Chris Hartgerink, without whose patience and many helpful comments this manuscript would be barely legible.
+
+#SessionInfo
+```{r SessionInfo}
+sessionInfo()
+```
+
+#References

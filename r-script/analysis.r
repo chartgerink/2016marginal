@@ -3,7 +3,7 @@
 #----------------------------------
 
 #Load dataset
-dat <- read.csv("../data/test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)
+dat <- read.csv("../data/final_marginal_dataset.csv", stringsAsFactors = FALSE)
 #Change for correct dataset when doing full analysis
 
 #---------------------------------------------------------------------
@@ -126,10 +126,10 @@ highlight <- replication.sum[replication.sum$year == 1990 | replication.sum$year
 
 p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
   geom_point(aes(color = result)) +
-  scale_color_gradient(trans = "reverse", limits = c(max(replication.sum$result), 0)) +
+  scale_color_viridis(option = "viridis", direction = -1, limits = c(0, max(replication.sum$result))) +
   geom_point(data = highlight, shape = 21, color = "red", size = 5) +
   geom_line() +
-  guides(color = guide_colorbar(reverse = T, title = expression(paste(italic("p"),"-values")))) +
+  guides(color = guide_colorbar(reverse = F, title = expression(paste(italic("p"),"-values")))) +
   theme(strip.text = element_text(face = "bold"), 
         axis.title = element_text(size = 9), 
         axis.text = element_text(size = 9),
@@ -172,4 +172,13 @@ p2 <- p + geom_label(data = eq, aes(label = V1), size = 3, x = 1985, y = Inf, hj
   scale_y_continuous(limits = c(0,100),
                      name = expression(paste("% of .05 < ",italic("p"), " <= .1 reported as marginally significant")))
 
+#Move 'social' plot to center of bottom row
+g <- ggplotGrob(p2)
 
+g$layout[grepl("panel-1-2", g$layout$name), c("l","r")] <- g$layout[grepl("panel-1-3", g$layout$name), c("l","r")] 
+g$layout[grepl("axis-l-4-1", g$layout$name), c("l","r")] <- g$layout[grepl("axis-l-2-2", g$layout$name), c("l","r")] 
+g$layout[grepl("axis-b-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("axis-b-2-2", g$layout$name), c("l","r")] 
+g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("strip-t-2-2", g$layout$name), c("l","r")] 
+
+grid.newpage()
+grid.draw(g)
