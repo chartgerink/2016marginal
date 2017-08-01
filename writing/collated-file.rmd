@@ -1,0 +1,231 @@
+---
+title             : "The prevalence of marginally significant results in psychology over time"
+shorttitle        : "The prevalence of marginally significant results"
+
+author: 
+  - name          : "Anton Ohlsson Collentine"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Professor Cobbenhagenlaan, Simon Building, 5037 AB Tilburg"
+    email         : "j.a.e.olssoncollentine@tilburguniversity.edu"
+
+affiliation:
+  - id            : "1"
+    institution   : "Tilburg University"
+
+abstract: |
+  We examined the proportion of _p_-values ($.05 < p \leq.1$) reported as marginally significant in 44,200 articles across 9 psychological disciplines, published in 70 journals belonging to the American Psychological Association (APA) between 1985 and 2016. Using regular expressions we extracted 42,504 _p_-values between .05 and .1. Overall almost 40% of _p_-values between .05 and .1 were reported as marginally significant, though there were considerable differences between disciplines. The practice is most common in organizational psychology (45.4%) and the least common in clinical psychology (30.1%).  Contrary to what was reported by @10.1177/0956797616645672, we found no evidence of an increasing trend in any discipline; in all disciplines the percentage of _p_-values reported as marginally significant was decreasing or constant over time. The 'Journal of Personality and Social Psychology' (JPSP) , also examined by @10.1177/0956797616645672, was an exception to the general trend and showed an increase over time. The degree to which reporting results as marginally significant is problematic depends largely on individual interpretation. Due to the low evidential value of _p_-values between .05 and .1 we recommend against reporting these results as marginally significant.
+  
+keywords          : "psychology, APA, marginal significance, over time"
+wordcount         : "187"
+
+bibliography      : ../bibliography/bibliography-marginal.bib
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : no
+
+lang              : "english"
+class             : "man"
+output            : papaja::apa6_word
+---
+
+```{r load_packages, include = FALSE}
+library("papaja")
+```
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=6, fig.height=4, echo=FALSE, warning=FALSE, message=FALSE)
+```
+```{r r_objects}
+marginal <- readRDS("./marginal_rmarkdown_objects.RData")
+```
+```{r graph1-code, include=FALSE}
+##Analysis of data - marginally significant results in APA-journals: https://osf.io/28gxz/
+
+#----------------------------------
+##Startup
+#----------------------------------
+
+#Load dataset
+dat <- read.csv("../data/final_marginal_dataset.csv", stringsAsFactors = FALSE)
+
+#---------------------------------------------------------------------
+##Dataframes with proportion of marginal results per year for JPSP and 'Developmental Psychology'
+#---------------------------------------------------------------------
+jpsp.sum <- merge(aggregate(result ~ year, data = dat[dat$journal == "Journal of Personality and Social Psychology",], FUN = length), 
+                    aggregate(marginal ~ year, data = dat[dat$journal == "Journal of Personality and Social Psychology",], FUN = sum), by = "year")
+
+jpsp.sum$percentage.marginal <- 100*(jpsp.sum$marginal/jpsp.sum$result)
+
+dp.sum <- merge(aggregate(result ~ year, data = dat[dat$journal == "Developmental Psychology",], FUN = length), 
+                    aggregate(marginal ~ year, data = dat[dat$journal == "Developmental Psychology",], FUN = sum), by = "year")
+
+dp.sum$percentage.marginal <- 100*(dp.sum$marginal/dp.sum$result)
+
+#Combine into one dataframe for graphing
+if(!require(gdata)){install.packages("gdata")}
+library(gdata)
+
+replication.sum <- combine(dp.sum, jpsp.sum)
+replication.sum$source <- factor(replication.sum$source, labels = c("DP", "JPSP"))
+
+#-------------------------------------------------------
+##Linear models and plots
+#-------------------------------------------------------
+if(!require(ggplot2)){install.packages("ggplot2")}
+if(!require(plyr)){install.packages("plyr")}
+if(!require(viridis)){install.packages("viridis")}
+if(!require(scales)){install.packages("scales")}
+library(plyr)
+library(ggplot2)
+library(viridis)
+library(scales)
+
+#Function for statistics to label graphs with
+
+lm_eqn = function(df){
+  m = lm(percentage.marginal ~ year, df);
+  eq <- substitute(italic(b) == beta %.%","~~italic(r)^2~"="~r2, 
+                   list(beta = round(coef(m)[2], digits = 2), 
+                        r2 = round(summary(m)$r.squared, digits = 2)))
+  as.character(as.expression(eq));                 
+}
+
+#Plot1
+
+eq <- ddply(replication.sum, .(source), lm_eqn)
+
+highlight <- replication.sum[replication.sum$year == 1990 | replication.sum$year == 2000 | replication.sum$year == 2010,]
+
+p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
+  geom_point(aes(color = result)) +
+  scale_color_viridis(option = "viridis", direction = -1, limits = c(0, max(replication.sum$result))) +
+  geom_point(data = highlight, shape = 21, color = "red", size = 5) +
+  geom_line() +
+  guides(color = guide_colorbar(reverse = F, title = expression(paste(italic("p"),"-values")))) +
+  theme(strip.text = element_text(face = "bold"), 
+        axis.title = element_text(size = 9), 
+        axis.text = element_text(size = 9),
+        legend.title = element_text(size = 9),
+        panel.background = element_rect(fill = "grey93"),
+        strip.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
+
+p1 <- p + geom_label(data = eq, aes(label = V1), size = 3, x = 1985, y = Inf, hjust = 0, vjust = 1, label.r = unit(0, "lines"), 
+                     label.padding = unit(0.12, "lines"), parse = TRUE, inherit.aes = FALSE) +
+  facet_wrap(~source) +
+  scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
+  scale_y_continuous(name = expression(paste("% of .05 < ",italic("p"), " <= .1 reported as marginally significant")))
+```
+
+@10.1177/0956797616645672 examined the incidence of articles reporting results as 'marginally' significant in psychology. They looked at the frequency of articles reporting at least one result as marginally significant or approaching significance, for articles from the journals 'Cognitive Psychology', 'Developmental Psychology' (DP), and the 'Journal of Personality and Social Psychology' (JPSP) for the years 1970, 1980, 1990, 2000, and 2010. In total they extracted 1,535 articles, meant to "_represent three major subfields of psychology: cognitive, developmental, and social_" (p. 1037) over time. Pritschet et al. (2016) drew two conclusions: 1) the proportion of articles reporting results as marginally significant (or variations thereof) has risen considerably in all three journals from 1970 to 2010; 2) results from articles published in JPSP (representing social psychology) were more likely to be interpreted as marginally significant than articles in 'Cognitive Psychology' or 'Developmental Psychology' (representing their respective subfields/disciplines).
+
+@10.1177/0956797616645672's two conclusions regarding the prevalence of 'marginally significant' results in psychology may be incorrect due to a confounding factor. Their outcome variable was the proportion of papers reporting one or more results as marginally significant. However, if an article contains more _p_-values, the probability increases that the article contains at least one result reported as marginally significant. Problematically, @10.1177/0956797616645672's outcome measure does not take into account the fact that the number of reported _p_-values per journal article has increased over the years, nor that articles in JPSP on average contain more _p_-values than those in (at least) 'Developmental Psychology' [@10.3758/s13428-015-0664-2]. Consequently,  newer articles will be more likely to contain at least one 'marginally significant' result than older articles. In fact, even if there had been a decrease in 'marginally significant' results, @10.1177/0956797616645672 could have found an increase. Similarly, articles in JPSP contain almost twice as many _p_-values as those in 'Developmental Psychology' [@10.3758/s13428-015-0664-2]. Hence, here too, even if the probability that a result is reported as marginally significant is lower in social psychology, @10.1177/0956797616645672 could have found an increase. Thus, using as the outcome variable the proportion of papers reporting at least one result as marginally significant provides little information on researchers' usage of the concept of marginal significance, both over time and across journals.
+
+In the current paper we re-examine @10.1177/0956797616645672's claims that 'marginally significant' results have become more prevalent over time in the journals JPSP and DP, and that results are reported as marginally significant more frequently in JPSP than in DP. We choose these two journals because they are both published by the American Psychological Association (APA). We adapted the dependent variable (DV) to take into account the varying number of _p_-values between different years and different journals. As such, we look at the proportion of _p_-values reported as marginally significant across years and journals. More specifically, since @10.3758/s13428-015-0664-2 report that a _p_-value of .05 is typically considered to be significant and @10.1177/0956797616645672 report that most of the 'marginally significant' _p_-values they examined were equal to .1 or below, we look at the proportion of _p_-values between .05 and .1 reported as marginally significant across years and disciplines. 
+
+Whole parts of the scientific literature can be effectively examined using automated methods. Based on such automated methods several recent publications have successfully used extracted statistics to examine the scientific literature [e.g., @10.7717/peerj.1142; @10.3758/s13428-015-0664-2; @10.1080/19312458.2015.1096333]. One of the most common automated methods is using so called regular expressions that search through the provided (article) text for pre-defined strings of text, the results of which are then saved to a data file for analysis. The more complex the data that needs to be extracted, the more limited this method becomes. Fortunately, when solely extracting _p_-values only three things need be identified in the text: the '_p_', the comparison sign, and the value itself [see @10.1093/biostatistics/kxt007, and discussions in the same issue of Biostatistics for an extensive treatment on the extraction of _p_-values]. The advantage of automated methods when examining the scientific literature is that they permit collecting large samples of data. For example, @10.3758/s13428-015-0664-2, despite using a R-package ('statcheck') that only extracts complete APA-formatted test results (t-, F-values etc), collected 258,105 _p_-values from 30,717 articles published between 1985 and 2013. 
+
+Using automated extraction of _p_-values, we first replicate and then extend @10.1177/0956797616645672. @10.1177/0956797616645672 examined the incidence of 'marginally significant' results in three journals: JPSP, DP and 'Cognitive psychology', meant to represent the psychological disciplines of social, developmental and cognitive psychology. They thus used only one journal to represent each discipline, and with data from only five years for each journal. Using automated extraction, we collect data from articles published between 1985 and 2016 in journals published by the APA. This permits us to examine @10.1177/0956797616645672's claims with data from up to 32 consecutive years per discipline, and with a number of journals making up each discipline, thus decreasing the risk of sampling bias and increasing precision of trend estimates. Moreover, it also allows us to examine the prevalence of 'marginally significant' results in APA-journals overall, and in six psychological disciplines beyond those explored by @10.1177/0956797616645672: Clinical psychology, educational psychology, experimental psychology, forensic psychology, health psychology, and organizational psychology.
+
+#Method
+All code and data for this project is available at osf.io/28gxz (preserved at [XXXX]). We refer to the relevant code files on OSF using brackets and links in the sections below, i.e. (osf.io/XXXX/). We ran all analyses using R version 3.4.1 [@Rref]. 
+
+##Data
+We reused downloaded articles from @10.3390/data1030014, consisting of 74,489 articles published between 1985 and 2016 in 74 APA journals (`r signif(100*(74/93), digits = 2)`% of currently existing APA journals). We limited ourselves to data from journals belonging to the APA, since the APA divides their journals into topics [@APAjournals]. We use these topics to represent nine psychological disciplines: "_Basic / Experimental Psychology_" (experimental psychology), "_Clinical Psychology_" (clinical psychology), "_Developmental Psychology_" (developmental psychology), "_Educational Psychology, School Psychology & Training_" (educational psychology), "_Forensic Psychology_" (forensic psychology), "_Health Psychology & Medicine_" (health psychology), "_Industrial/Organizational Psychology & Management_" (organizational psychology), "_Neuroscience & Cognition_" (cognitive psychology), and "_Social Psychology & Social Processes_" (social psychology). The topic "_Core of Psychology_" [@APAjournals] consists of journals that publish on general or  interdisciplinary psychology, and we therefore do not consider it a discipline in psychology and exclude entries unique to it from our final dataset. Four journals and `r marginal$corearticles` articles were unique to this category and thus excluded. See Appendix A for a detailed summary of journals (not) included in our sample, and their division into topics and disciplines. 
+
+As @10.3390/data1030014 only downloaded articles in HTML format, the time span for each journal depends on the year articles became available in HTML format. We ordered downloaded HTML articles into separate folders, and then converted them into raw text using the python tool 'html2text (osf.io/4yqhj/; pypi.python.org/pypi/html2text). We extracted the following information from each article using regular expressions (osf.io/qaw74/): DOI (when available), raw text of the _p_-values (_e.g._ "$p=.048$"), sign of the _p_-value comparison ('>','<' or '='), the _p_-value itself, and the 200 characters preceding the reported _p_-value, and the 200 characters immediately succeeding. We collated these data into one large dataset containing `r marginal$entries.original` entries, with one entry pertaining to results of one p-value (osf.io/f3mga/).
+
+##Data Preparation
+We excluded a small number of entries from the extracted data due to misreporting or extraction failure (see Figure 1 for a flowchart). We removed  entries lacking DOI (and journal name/year; n = `r marginal$nodoi`, `r marginal$nodoipercent`% of total), and all entries where the _p_-values were not numerical (_e.g._ equal to "."; n = `r marginal$badp`, `r marginal$badppercent`% of total; osf.io/gzyt9/). _P_-values that were misreported as too high (_e.g._ $p = 1.2$ instead of $p = .12$) were excluded together with all other _p_-values above .1 at a later stage, see below. Note that a few misreported _p_-values will remain in the dataset, those misrepored as _e.g._ $p = .099$ instead of $p = .99$.
+
+Subsequently, we added discipline information to each entry. Before adding this information, we used the r-package 'rcrossref' [@rcrossref] to retriev missing metadata (years and journal name) for all entries lacking such data (n = `r marginal$mis.meta; marginal$mis.metapercent`% of total; osf.io/gzyt9/). We also standardized journal names for all entries, with older journal names updated to their current APA-names (2017, see Appendix A; osf.io/gzyt9/). We then added dummies for each discipline to all entries (osf.io/gzyt9/). 
+
+Finally, we excluded the topic 'core of psychology', all _p_-values outside of the range of .05 - .1 and created a test sample. We excluded `r marginal$unique.core` (`r marginal$unique.corepercent`% of total) entries unique to the topic 'core of psychology' (osf.io/gzyt9/). Limiting the dataset to _p_-values $.05 < p \leq.1%$ then resulted in a final sample consisting of `r marginal$entries.final` (`r marginal$entries.finalpercent`% of total) _p_-values (osf.io/gzyt9/). From the final dataset, we drew a stratified random sample of 6% per journal for testing code used for data analysis (osf.io/y953k/). For our analyses reported below we used the full final dataset, including the test sample data.
+
+```{r flowchart, fig.cap="_Figure 1._ Flowchart illustrating the process generating the test sample and the final dataset.", echo = FALSE, fig.align='center'}
+knitr::include_graphics("../figures/flowchart_marginal.png", auto_pdf = TRUE)
+```
+
+Table 1 summarizes the data per discipline. As per the APA's categorization, a journal may belong to multiple disciplines (see also Appendix A). A _p_-value in an article is thus part of the _p_-value count for each discipline it belongs to. To determine whether a result was reported as marginally significant, we searched the 200 characters preceding and the 200 characters succeeding a given _p_-value for the expressions "margin\*" and "approach\*" using regular expressions and considered the _p_-value to be reported as marginally significant if either of those expressions was found.
+
+```{r table_1}
+library(knitr)
+kable(marginal$table1, caption = "Table 1. Specification for different psychological disciplines of the number of APA journals scanned for _p_-values, the number of articles with extracted data, the number of _p_-values extracted (and per article), the number of _p_-values between .05 and .1 (and per article), and the percentage of _p_-values between .05 and .1 that were reported as marginally significant.", align = "l", col.names = c("Discipline", "Journals", "Articles", "_p_-values (per article)", ".05 < p <= .1 (per article)", "Marg. Sig. In %"))
+```
+
+Table 2 compares our data with the data provided by @10.1177/0956797616645672 [available at osf.io/92xqk] with respect to the two APA-journals (DP and JPSP) that their article and ours have in common. @10.1177/0956797616645672 concerned themselves only with the binary option of whether an article contained a 'marginally significant' result or not, and consequently each row in their dataset represents a different article. As such, their data does not include the total number  of _p_-values, nor the number of _p_-values between .05 and .1. Moreover, their percentage of 'marginally significant' results is the proportion of articles containing at least one result reported as marginally significant, whereas in the current paper that percentage is the proportion of _p_-values between .05 and .1 reported as marginally significant. 
+
+```{r table_2}
+library(knitr)
+kable(marginal$table2, caption = "Table 2. Comparison between the data of @10.1177/0956797616645672 and the current paper with respect to the journals 'Journal of Personality and Social Psychology' (JPSP) and 'Developmental Psychology' (DP). Presented are time span of downloaded articles, the number of articles examined, the number of _p_-values extracted (and per article), the number of _p_-values between .05 and .1 (and per article), and the percentage of _p_-values  that were reported as marginally significant. The dataset of @10.1177/0956797616645672 does not include information on the total number of _p_-values nor the number of _p_-values between .05 and .1, resulting in NA-values." , align = "l", col.names = c("Journal", "Time Span", "Articles", "_p_-values (per article)", ".05 < p <= .1 (per article)", "Marg. Sig. In %"))
+```
+
+##Analyses
+Due to using non-random (only APA-articles available in HTML format at the time of download) dependent samples (many _p_-values are included in multiple disciplines), we present only descriptive statistics and conduct no inferential statistical testing. We describe trends in percentages of all 'marginally significant' results across years and disciplines, and for only JPSP/DP (osf.io/wa62v/). To aid interpretation we estimate 12 simple linear regressions using least squares estimation, one for each discipline, overall and one each for JPSP/DP. We report estimated _b_-values and coefficients of determination. The outcome variable in these regressions is the proportion of _p_-values ($.05 < p \leq.1%$) reported as marginally significant per year in each category. The independent variable is the year (range 1985 - 2016) of publication of the articles from which the _p_-values were extracted. In addition we report averages across the years for each category (osf.io/79t2p/). We will conduct no other confirmatory data analyses. Any additional analyses we will accordingly label as exploratory. 
+
+#Results
+We present our results in two steps. First, we present results for the journals JPSP and DP. Here we also highlight the years (1990, 2000, 2010) which our dataset shares with that of @10.1177/0956797616645672 for the two journals. Secondly, we present the results for all included APA-journals taken together, and for the nine psychological disciplines previously described (see table 1). 
+
+##JPSP and DP
+On average it was more common that _p_-values were reported as marginally significant in JPSP than in DP (see Table 2). In @10.1177/0956797616645672's data, `r marginal$pritschet.jpsp`% of articles in JPSP contained at least one 'marginally significant result', compared with `r marginal$pritschet.dp`% in DP. We estimated that `r marginal$marg.jpsp`% of _p_-values ($.05 < p \leq.1$) were reported as marginally significant in JPSP, versus `r marginal$marg.dp`% in DP. We examine possible reasons for the differences in estimates between @10.1177/0956797616645672 and us in the exploratory section below.
+
+We examined trends across the years in the reporting of 'marginally significant' results for JPSP and DP (see Figure 2). Red circles indicate years for which @10.1177/0956797616645672 also reported estimates. Overall the trend for DP appears to be mostly stable, or even slightly decreasing (_b_ = - 0.15, _r²_ = .05) whereas in JPSP there has been an increase in the percentage of results reported as marginally significant in the period 1985 - 2016 (_b_ = 0.28, _r²_ = .22). This partially corroborates @10.1177/0956797616645672, who found a positive trend for both DP and JPSP.
+
+```{r graph1, fig.cap= "_Figure 2_. Percent of _p_-values (.05 < _p_ <= .1) reported as marginally significant between 1985 and 2016 in the two journals 'Journal of Personality and Social Psychology' (JPSP) and 'Developmental Psychology' (DP). Yellow color indicates a low number of reported _p_-values between .05 and .1 in a year and dark blue a high number. Coefficients of determination and _b_-values are reported from simple linear regressions for each journal. Red circles highlight years that were also examined by @10.1177/0956797616645672."}
+p1
+```
+
+##Psychology and its disciplines
+Reporting _p_-values between .05 and .1 as marginally significant was common practice in all psychological disciplines. Table 2 shows that on average almost 40% of _p_-values ($.05 < p \leq.1$) in the 70 examined APA journals were reported as marginally significant between 1985 and 2016. The practice was most common in organizational (`r marginal$marg.organizational`%), social (`r marginal$marg.social`%) and experimental psychology (`r marginal$marg.experimental`%). Fewest _p_-values between .05 and .1 were reported as marginally significant in clinical (`r marginal$marg.clinical`%), health (`r marginal$marg.health`%) and forensic psychology (`r marginal$marg.forensic`%). The disciplines of educational (`r marginal$marg.educational`%), developmental (`r marginal$marg.developmental`%) and cognitive psychology (`r marginal$marg.cognitive`%) fell in between these two groups.
+
+We examined the overall trend in the reporting of 'marginally significant' results and the trends in each discipline (see Figure 3). Across all journals the percentage of _p_-values reported as marginally significant has decreased (_b_ = -0.32, _r²_ = .48) in the period 1985 to 2016. For no discipline was there evidence of an increasing trend. On the basis of the linear trend (b), the largest decreases were in forensic (_b_ = -0.92, _r²_ = .42), cognitive (_b_ = -0.68, _r²_ = .58) and experimental psychology (_b_ = -0.6, _r²_ = .6). Three disciplines were mostly stable over the years: Social (_b_ = -0.02, _r²_ = 0), organizational (_b_ = -0.09, _r²_ = .03) and developmental psychology (_b_ = -0.12, _r²_ = .05). The change over time for the three remaining disciplines fell in between these two groups. These were health (_b_ = -0.27, _r²_ = .18), clinical (_b_ = -0.29, _r²_ = .29) and educational psychology (_b_ = -0.35, _r²_ = .33).
+
+```{r figure3, fig.cap="_Figure 3._ Percent of _p_-values (.05 < _p_ <= .1) reported as marginally significant between 1985 and 2016 in different psychological disciplines with data extracted from APA-journals. Yellow color indicates a low number of reported _p_-values between .05 and .1 each year and dark blue a high number. Coefficients of determination and _b_-values are reported from simple linear regressions for each discipline.", echo = FALSE, fig.align='center'}
+knitr::include_graphics("../figures/figure3.png", auto_pdf = TRUE)
+```
+
+##Exploratory analyses
+That our estimates were higher than those of @10.1177/0956797616645672 has three likely explanations. It may be: 1) due to @10.1177/0956797616645672 only observing a few select years, 2) due to a difference in denominators between @10.1177/0956797616645672's DV and ours, or 3) due to a difference in numerators between the DVs. We examine these possibilities below.
+
+It may be that @10.1177/0956797616645672 coincidentally only examined years with lower percentages of 'marginally significant' results. Of the five years examined by @10.1177/0956797616645672 our data includes three (1990, 2000, 2010; see Figure 2). Using only these three years we estimated the percent 'marginally significant' _p_-values in JPSP and DP. Comparing this estimate for JPSP (`r marginal$marg.jpsp.1990.2010`%) with that of @10.1177/0956797616645672 for JPSP (`r marginal$pritschet.jpsp`%), the difference seems to largely disappear. While our estimate is still about a percentage point higher, @10.1177/0956797616645672 report low proportions of 'marginally significant' results for the years not included in our sample (1970/1980) which might explain the remaining difference. The difference in estimates for JPSP thus appears to be explained by which years were examined. The same is not true of DP where the difference between our estimate and @10.1177/0956797616645672's remains large (`r marginal$marg.dp.1990.2010`% versus `r marginal$pritschet.dp`%) and practically unchanged from the estimate based on all 32 years in our sample (`r marginal$marg.dp`%). 
+
+The denominator of @10.1177/0956797616645672's DV may be inflated compared to our denominator. If the number of articles lacking 'marginally significant' results is higher than the number of _p_-values ($.05 < p \leq.1$) not reported as marginally significant, then the DV of @10.1177/0956797616645672 will result in lower estimates. The denominator for @10.1177/0956797616645672's DV is the number of articles containing _p_-values and ours is the number of _p_-values between .05 and .1. In our data, DP has `r marginal$no.marg.a.dp` articles without 'marginally significant' results and `r marginal$amarg.dp` with at least one. DP also has `r marginal$no.marg.p.dp` _p_-values ($.05 < p \leq.1$) not reported as marginally significant and at least as many 'marginally significant' _p_-values as there are articles containing such results. Even in the extreme case of there being only one 'marginally significant' _p_-value in each article containing 'marginally significant' results (the numerator thus being the same between DVs), our DV would still give an estimate for DP about 7 percentage points higher (`r marginal$extreme.dp`%) than the estimate using @10.1177/0956797616645672's article level DV (`r marginal$dp.percent.article`%).
+
+The numerator of @10.1177/0956797616645672's DV may be deflated compared to ours due to not taking into account dependencies at the article level in 'marginally significant' _p_-values. This may partly explain their lower estimates. In DP there are `r marginal$marg.dp.no` 'marginally significant' _p_-values between .05 and .1 (our numerator), but only `r marginal$amarg.dp` articles containing at least one 'marginally significant' result [@10.1177/0956797616645672's numerator]. Holding the non-'marginally significant' parts of the two DV denominators the same for DP (e.g equal to the number of articles without 'marginally significant' results), this effect leads to a higher estimate for our DV by about 10 percentage points (`r marginal$dp.partly.equal.denom`% vs `r marginal$dp.percent.article`%). For DP, the combined effect of differences in the numerator and denominator between the DVs is about 17% percentage points. This is actually about 2 percentage points more than the difference in estimates between @10.1177/0956797616645672 and us for this journal (`r marginal$pritschet.dp`% versus `r marginal$marg.dp`%). This might be an indication that our automated extraction of 'marginally significant' _p_-value misses a few 'marginally significant' results that would have been found with manual extraction.
+
+#Discussion
+```{r hankins}
+b <- read.csv("../data/hankins.csv", stringsAsFactors = F)
+b$marg <- grepl("margin|approach", b$X.barely..not.statistically.significant..p.0.052.)
+```
+We have examined the incidence of 'marginally significant' results in psychology and its disciplines between 1985 and 2016. @10.1177/0956797616645672 previously examined the prevalence of 'marginal significance' in three psychological journals: JPSP (representing social psychology), DP (representing developmental psychology) and 'Cognitive Psychology'(representing cognitive psychology). However, they did not take into account the increasing number of _p_-values over time, nor the differences in _p_-values between disciplines. We have re-examined their claims that 'marginally significant' results have become more common in social, developmental and cognitive psychology; and that they are more common in social than in developmental or cognitive psychology. We have also examined the incidence of 'marginally significant' results in 6 additional psychological disciplines beyond these three. To do so we have examined 42,504 _p_-values ($.05 < p \leq.1$) extracted from 70 APA journals using regular expressions. We searched the 400 characters surrounding a _p_-value for indicators of marginal significance and reported the percentages of _p_-values between .05 and .1 that were indicated as marginally significant.
+
+That _p_-values between .05 and .1 are interpreted as marginally significant appears common in psychology. Across the 9 disciplines we examined, almost 40% of such values were reported as marginally significant in the period 1985-2016, though the prevalence differed by discipline. @10.1177/0956797616645672 claimed that the practice was more common in social psychology than in developmental or cognitive psychology, but did not take into account different numbers of _p_-values between disciplines: Social psychology contains more _p_-values than the other two. Despite this, our results corroborate these claims. Overall, 'marginally significant' _p_-values were the most prevalent in organizational psychology and the least in clinical psychology. The reason for such differences between disciplines is difficult to speculate on. It may be that clinical researchers are more concerned about the repercussions of a potential false positive result than organizational researchers, or any number of other reasons which have affected attitudes amongst researchers and editors in the different disciplines differently. 
+
+All disciplines described a downward trend in the percentage of results reported as marginally significant between 1985 and 2016. Controlling for the increasing numbers of _p_-values across the years, the positive trends reported by @10.1177/0956797616645672 for cognitive, developmental and social psychology have thus disappeared. On the other hand, JPSP, which @10.1177/0956797616645672 used to represent social psychology, continues to show a positive trend. This illustrates the problem with using a single journal to represent entire psychological disciplines. The downward trend in psychology may reflect increasing awareness amongst researchers that _p_-values in the .05 - .1 range represent very weak evidence against the null [see e.g. @osf.io/preprints/psyarxiv/mky9j]. It may also be that percentages are decreasing due to increasingly stringent competition to publish and less leniency amongst editors for 'marginally significant' results [as previously suggested by @10.7717/peerj.1142]. Regardless of the reason, what matters is what happens to these studies instead, whether they end up in the file drawer, transformed into significant results [@10.1177/0956797611417632], or are published nonetheless, but without being called 'marginally significant'. We naturally hope for the latter.
+
+Our results are qualified by two factors. First, it is likely that our use of automatic extraction has occasionally resulted in _p_-values being incorrectly interpreted as 'marginally significant' or vice versa. This first limitation is largely compensated by our second limitation. Matthew @Hankins has compiled a list of `r nrow(b)` ways that researchers have described results as marginally significant. Out of these, only `r sum(b$marg)` include the expressions "margin\*" or "approach\*", our indicators of 'marginal significance'. Although there is no telling how common the different expressions on Hankins' list are, our estimates of the proportions of 'marginally significant' results are nonetheless likely to be underestimates.
+
+In the end, the degree to which reporting results as marginally significant is problematic depends largely on individual interpretation. Questionable Research Practices (QRPs) are practices which inflate the risk of false positive results [@10.1177/0956797611430953]. One of a multitude of such practices is the post-hoc decision to change what decision rule one uses, or how strictly it is applied [@10.3389/fpsyg.2016.01832]. Since most psychological researchers are likely to use a pre-defined alpha level, later reporting results as marginally significant is an example of a changing decision rule. The severity of this practice depends on to what extent the decision rule has been altered, i.e. the researcher's interpretation of the results. Due to the low evidential value of _p_-values between .05 and .1, even without mentioning the 'garden of forking paths' [@10.1511/2014.111.460], we recommend against reporting these results as marginally significant at all.
+
+#Acknowledgements
+I thank my supervisors Marcel van Assen and Chris Hartgerink, without whose patience and many helpful comments this manuscript would be barely legible.
+
+#SessionInfo
+```{r SessionInfo}
+sessionInfo()
+```
+\newpage
+
+#References
+```{r create_r-references}
+r_refs(file = "../bibliography/bibliography-marginal.bib")
+```
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}

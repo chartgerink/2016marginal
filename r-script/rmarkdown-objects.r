@@ -208,19 +208,42 @@ df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive",
                            "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
                                                          marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2))
 #------------------------------------------
-##exploratory section objects
+##exploratory analyses and objects
 #------------------------------------------
 
+#Estimates (proportions) for JPSP and DP using only 1990, 2000, and 2010 data
+marg.jpsp.1990.2010 <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]) /
+                      length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]))
+                  
+marg.dp.1990.2010 <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]) /
+                      length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]))
+
+#number of marginally significant results 
+result.amarg.jpsp <- round(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"])
+
+#Number of articles containing at least one marginally significant result in jpsp and p
 amarg.jpsp <- length(unique(dat2$doi[dat2$journal == "Journal of Personality and Social Psychology" & dat2$marginal == 1]))
 
 amarg.dp <- length(unique(dat2$doi[dat2$journal == "Developmental Psychology" & dat2$marginal == 1]))
 
+#Percent articles containing at least one marginally significant result in jpsp and dp
+jpsp.percent.article <- amarg.jpsp / a.jpsp
+dp.percent.article <- amarg.dp / a.dp
+
+#Extreme case of 1 'marginally significant' p-value per article dp (%)
+extreme.dp <- 100*(amarg.dp/(amarg.dp + p.limited.dp*(1-marg.dp/100)))
+
+#Dp % using a number equal to the number of articles articles as denominator
+jpsp.partly.equal.denom <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) / 
+                                  (sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) + (a.jpsp - amarg.jpsp)))
+                  
+dp.partly.equal.denom <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) / 
+                                  (sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) + (a.dp - amarg.dp)))
+
+#number of marginally significant results per article given that the article contains such a result [currently not used]
 result.amarg.jpsp <- round(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) / amarg.jpsp, digits = 2)
   
 result.amarg.dp <- round(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) / amarg.dp, digits = 2)
-
-jpsp.percent.article <- amarg.jpsp / a.jpsp
-dp.percent.article <- amarg.dp / a.dp
 
 #Trim strings to 100 characters and search them
 dat2$pre100 <- substr(dat2$pre, 100, 200)
@@ -262,7 +285,6 @@ df.table3 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive",
                        "percent.marginal100" = round(c(marg.overall100, marg.clinical100, marg.cognitive100, marg.developmental100, marg.educational100,
                                                          marg.experimental100, marg.forensic100, marg.health100, marg.organizational100, marg.social100), digits = 2))
 
-
 #------------------------------------------
 ##List of objects for r-markdown file
 #------------------------------------------
@@ -293,12 +315,21 @@ marginal_list <- list(entries.original = prettyNum(nrow(original), big.mark = ",
                       unique.corepercent = round(100*(nrow(core) / nrow(original)), digits = 2),
                       no.marg.a.dp = prettyNum((a.dp - amarg.dp), big.mark = ",", preserve.width = "none"),
                       no.marg.p.dp = prettyNum((p.limited.dp*(1-marg.dp/100)), big.mark = ",", preserve.width = "none"),
+                      amarg.jpsp = prettyNum(amarg.jpsp, big.mark = ",", preserve.width = "none"),
+                      amarg.dp = prettyNum(amarg.dp, big.mark = ",", preserve.width = "none"),
+                      extreme.dp = round(extreme.dp, digits = 2),
+                      dp.partly.equal.denom = round(dp.partly.equal.denom, digits = 2),
+                      jpsp.partly.equal.denom = round(jpsp.partly.equal.denom, digits = 2),
                       result.amarg.jpsp = result.amarg.jpsp,
                       result.amarg.dp = result.amarg.dp,
+                      marg.jpsp.1990.2010 = round(marg.jpsp.1990.2010, digits = 2),
+                      marg.dp.1990.2010 = round(marg.dp.1990.2010, digits = 2),
                       jpsp.percent.article = round(100*jpsp.percent.article, digits = 2),
                       dp.percent.article = round(100*dp.percent.article, digits = 2),
                       pritschet.jpsp = round(pritschet.marginal.jpsp, digits = 2),
                       pritschet.dp = round(pritschet.marginal.dp, digits = 2),
+                      marg.dp.no = prettyNum(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]), big.mark = ",", preserve.width = "none"),
+                      marg.jpsp.no = prettyNum(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]), big.mark = ",", preserve.width = "none"),
                       marg.jpsp = round(marg.jpsp, digits = 2),
                       marg.dp = round(marg.dp, digits = 2),
                       marg.jpsp100 = round(marg.jpsp100, digits = 2),
