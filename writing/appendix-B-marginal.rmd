@@ -1,6 +1,7 @@
 ---
 title: "Appendix B: Exploratory analyses"
 bibliography: ../bibliography/bibliography-marginal.bib
+csl: ../bibliography/apa.csl
 output: word_document
 ---
 ```{r global_options, include=FALSE}
