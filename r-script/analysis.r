@@ -113,7 +113,7 @@ library(grid)
 
 lm_eqn = function(df){
   m = lm(percentage.marginal ~ year, df);
-  eq <- substitute(italic(b) == beta %.%","~~italic(r)^2~"="~r2, 
+  eq <- substitute(italic(b) == beta %.%","~~italic(R)^2~"="~r2, 
                    list(beta = round(coef(m)[2], digits = 2), 
                         r2 = round(summary(m)$r.squared, digits = 2)))
   as.character(as.expression(eq));                 
@@ -135,7 +135,7 @@ p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
         axis.title = element_text(size = 9), 
         axis.text = element_text(size = 9),
         legend.title = element_text(size = 9),
-        panel.background = element_rect(fill = "grey93"),
+        panel.background = element_rect(fill = "white"),
         strip.background = element_blank(),
         panel.grid = element_blank(),
         panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
@@ -161,7 +161,7 @@ p <- ggplot(results.sum, aes(x = year, y = percentage.marginal)) +
         axis.title = element_text(size = 9), 
         axis.text = element_text(size = 9),
         legend.title = element_text(size = 9),
-        panel.background = element_rect(fill = "grey93"),
+        panel.background = element_rect(fill = "white"),
         strip.background = element_blank(),
         panel.grid = element_blank(),
         panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))

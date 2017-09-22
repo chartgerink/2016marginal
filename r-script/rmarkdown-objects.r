@@ -208,82 +208,44 @@ df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive",
                            "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
                                                          marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2))
 #------------------------------------------
-##exploratory analyses and objects
+##exploratory analyses and objects 
 #------------------------------------------
+explore.jpsp <- dat2[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | 
+                     dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2000 | 
+                     dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2010,]
 
-#Estimates (proportions) for JPSP and DP using only 1990, 2000, and 2010 data
-marg.jpsp.1990.2010 <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]) /
-                      length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]))
-                  
-marg.dp.1990.2010 <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]) /
-                      length(dat2$result[dat2$journal == "Developmental Psychology" & dat2$year == 1990 | dat2$year == 2000 | dat2$year == 2010]))
+explore.dp <- dat2[dat2$journal == "Developmental Psychology" & dat2$year == 1990 | 
+                   dat2$journal == "Developmental Psychology" & dat2$year == 2000 | 
+                   dat2$journal == "Developmental Psychology" & dat2$year == 2010,]
 
-#number of marginally significant results 
-result.amarg.jpsp <- round(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"])
+#to use for number of non. sig. articles (since must contain all p-values)
+explore.jpsp.articles <- dat[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 1990 | 
+                         dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2000 | 
+                         dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2010,]
 
-#Number of articles containing at least one marginally significant result in jpsp and p
-amarg.jpsp <- length(unique(dat2$doi[dat2$journal == "Journal of Personality and Social Psychology" & dat2$marginal == 1]))
+explore.dp.articles <- dat[dat$journal == "Developmental Psychology" & dat$year == 1990 | 
+                       dat$journal == "Developmental Psychology" & dat$year == 2000 | 
+                       dat$journal == "Developmental Psychology" & dat$year == 2010,]
 
-amarg.dp <- length(unique(dat2$doi[dat2$journal == "Developmental Psychology" & dat2$marginal == 1]))
+#Number of marginally significant p-values in JPSP and DP 1990,2000, 2010
+sum(explore.jpsp$marginal)
+sum(explore.dp$marginal)
 
-#Percent articles containing at least one marginally significant result in jpsp and dp
-jpsp.percent.article <- amarg.jpsp / a.jpsp
-dp.percent.article <- amarg.dp / a.dp
+#Number of articles containing at least one marginally significant result in jpsp and dp for the three years
+a.marg.jpsp.1990.2010 <- length(unique(explore.jpsp$doi[explore.jpsp$marginal == 1]))
 
-#Extreme case of 1 'marginally significant' p-value per article dp (%)
-extreme.dp <- 100*(amarg.dp/(amarg.dp + p.limited.dp*(1-marg.dp/100)))
+a.marg.dp.1990.2010 <- length(unique(explore.dp$doi[explore.dp$marginal == 1]))
 
-#Dp % using a number equal to the number of articles articles as denominator
-jpsp.partly.equal.denom <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) / 
-                                  (sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) + (a.jpsp - amarg.jpsp)))
-                  
-dp.partly.equal.denom <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) / 
-                                  (sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) + (a.dp - amarg.dp)))
+#Estimates (proportions) marg. sig. p-values for JPSP and DP using only 1990, 2000, and 2010 data
 
-#number of marginally significant results per article given that the article contains such a result [currently not used]
-result.amarg.jpsp <- round(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) / amarg.jpsp, digits = 2)
-  
-result.amarg.dp <- round(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) / amarg.dp, digits = 2)
+marg.jpsp.1990.2010 <- 100*(sum(explore.jpsp$marginal)/length(explore.jpsp$result))
 
-#Trim strings to 100 characters and search them
-dat2$pre100 <- substr(dat2$pre, 100, 200)
-dat2$post100 <- substr(dat2$post, 1, 100)
-dat2$marginal100 <- grepl("margin|approach", dat2$pre100) | grepl("margin|approach", dat2$post100)
+marg.dp.1990.2010 <- 100*(sum(explore.dp$marginal) / length(explore.dp$result))
 
-marg.jpsp100 <- 100*(sum(dat2$marginal100[dat2$journal == "Journal of Personality and Social Psychology"]) /
-                      length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"]))
-                  
-marg.dp100 <- 100*(sum(dat2$marginal100[dat2$journal == "Developmental Psychology"]) /
-                      length(dat2$result[dat2$journal == "Developmental Psychology"]))
+#Estimates article level (equation 2) for JPSP and DP 1990,2000, 2010
+marg.a.jpsp.1990.2010 <- 100*(a.marg.jpsp.1990.2010 / (a.marg.jpsp.1990.2010 + length(unique(explore.jpsp.articles$doi)) - a.marg.jpsp.1990.2010))
 
-#marginally significant fields and overall searching 100 characters (%)
-marg.overall100 <- 100*(sum(dat2$marginal100) / length(dat2$result))
-
-marg.clinical100 <- 100*(sum(dat2$marginal100[dat2$Clinical.Psychology == 1]) / length(dat2$result[dat2$Clinical.Psychology == 1]))
-
-marg.cognitive100 <- 100*(sum(dat2$marginal100[dat2$Neuroscience...Cognition == 1]) / length(dat2$result[dat2$Neuroscience...Cognition == 1]))
-
-marg.developmental100 <- 100*(sum(dat2$marginal100[dat2$Developmental.Psychology == 1]) / length(dat2$result[dat2$Developmental.Psychology == 1]))
-
-marg.educational100 <- 100*(sum(dat2$marginal100[dat2$Educational.Psychology..School.Psychology...Training == 1]) / length(dat2$result[dat2$Educational.Psychology..School.Psychology...Training == 1]))
-
-marg.experimental100 <- 100*(sum(dat2$marginal100[dat2$Basic...Experimental.Psychology == 1]) / length(dat2$result[dat2$Basic...Experimental.Psychology == 1]))
-
-marg.forensic100 <- 100*(sum(dat2$marginal100[dat2$Forensic.Psychology == 1]) / length(dat2$result[dat2$Forensic.Psychology == 1]))
-            
-marg.health100 <- 100*(sum(dat2$marginal100[dat2$Health.Psychology...Medicine == 1]) / length(dat2$result[dat2$Health.Psychology...Medicine == 1]))
-                 
-marg.organizational100 <- 100*(sum(dat2$marginal100[dat2$Industrial.Organizational.Psychology...Management == 1]) / length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]))
- 
-marg.social100 <- 100*(sum(dat2$marginal100[dat2$Social.Psychology...Social.Processes == 1]) / length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]))
-
-#Dataframe for table3
-df.table3 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Developmental", "Educational",
-                                          "Experimental", "Forensic", "Health", "Organizational", "Social"), 
-                         "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
-                                                         marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2),
-                       "percent.marginal100" = round(c(marg.overall100, marg.clinical100, marg.cognitive100, marg.developmental100, marg.educational100,
-                                                         marg.experimental100, marg.forensic100, marg.health100, marg.organizational100, marg.social100), digits = 2))
+marg.a.dp.1990.2010 <- 100*(a.marg.dp.1990.2010 / (a.marg.dp.1990.2010 + length(unique(explore.dp.articles$doi)) - a.marg.dp.1990.2010))
 
 #------------------------------------------
 ##List of objects for r-markdown file
@@ -296,44 +258,30 @@ original$value <- as.numeric(original$value)
 #"original" = original full dataset without trimming, "dat" = full dataset with nodoi and missing p-values removed + journal names corrected + metadata and topics added, 
 #"dat2" = "dat" but only entries with .05 < p <= .1, "dat3" = data from Pritschet et al
 
-marginal_list <- list(entries.original = prettyNum(nrow(original), big.mark = ",", preserve.width = "none"), 
-                      nodoi = sum(grepl("nodoi", original$doi)), 
-                      nodoipercent = signif(100*(sum(grepl("nodoi", original$doi))/nrow(original)), digits = 2),
-                      badp = prettyNum(sum(is.na(original$value)), big.mark = ",", preserve.width = "none"), 
-                      badppercent = round(100*(sum(is.na(original$value))/nrow(original)), digits = 2),
-                      mis.meta = prettyNum(sum(is.na(original[!grepl("nodoi", original$doi) & !is.na(original$value),]$journal)), big.mark = ",", preserve.width = "none"),
-                      mis.metapercent = round(100*(sum(is.na(original[!grepl("nodoi", original$doi) & !is.na(original$value),]$journal)) / nrow(original)), digits = 2),
-                      entries.final = prettyNum(nrow(dat2), big.mark = ",", preserve.width = "none"), 
-                      entries.finalpercent = round(100*(nrow(dat2) / nrow(original)), digits = 2), 
-                      articles.with.p = prettyNum(length(unique(dat$doi)), big.mark = ",", preserve.width = "none"),
-                      articles.final = prettyNum(length(unique(dat2$doi)), big.mark = ",", preserve.width = "none"), 
-                      articles.finalpercent = round(100*(length(unique(dat2$doi))/length(unique(dat$doi))), digits = 2), 
-                      journals.final = length(unique(dat2$journal)), 
-                      difjournals = setdiff(unique(dat$journal), unique(dat2$journal)),
-                      corearticles = length(unique(core$doi)),
-                      unique.core = prettyNum(nrow(core), big.mark = ",", preserve.width = "none"),
-                      unique.corepercent = round(100*(nrow(core) / nrow(original)), digits = 2),
-                      no.marg.a.dp = prettyNum((a.dp - amarg.dp), big.mark = ",", preserve.width = "none"),
-                      no.marg.p.dp = prettyNum((p.limited.dp*(1-marg.dp/100)), big.mark = ",", preserve.width = "none"),
-                      amarg.jpsp = prettyNum(amarg.jpsp, big.mark = ",", preserve.width = "none"),
-                      amarg.dp = prettyNum(amarg.dp, big.mark = ",", preserve.width = "none"),
-                      extreme.dp = round(extreme.dp, digits = 2),
-                      dp.partly.equal.denom = round(dp.partly.equal.denom, digits = 2),
-                      jpsp.partly.equal.denom = round(jpsp.partly.equal.denom, digits = 2),
-                      result.amarg.jpsp = result.amarg.jpsp,
-                      result.amarg.dp = result.amarg.dp,
-                      marg.jpsp.1990.2010 = round(marg.jpsp.1990.2010, digits = 2),
-                      marg.dp.1990.2010 = round(marg.dp.1990.2010, digits = 2),
-                      jpsp.percent.article = round(100*jpsp.percent.article, digits = 2),
-                      dp.percent.article = round(100*dp.percent.article, digits = 2),
-                      pritschet.jpsp = round(pritschet.marginal.jpsp, digits = 2),
-                      pritschet.dp = round(pritschet.marginal.dp, digits = 2),
-                      marg.dp.no = prettyNum(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]), big.mark = ",", preserve.width = "none"),
-                      marg.jpsp.no = prettyNum(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]), big.mark = ",", preserve.width = "none"),
+marginal_list <- list(
+                      #Method section
+                      entries.original = prettyNum(nrow(original), big.mark = ",", preserve.width = "none"), #Number of p-values in 'original' dataset
+                      nodoi = sum(grepl("nodoi", original$doi)), #number of entries lacking doi in original dataset
+                      nodoipercent = signif(100*(sum(grepl("nodoi", original$doi))/nrow(original)), digits = 2), #as a percentage of total rows
+                      badp = prettyNum(sum(is.na(original$value)), big.mark = ",", preserve.width = "none"), #Number of missing p-vales
+                      badppercent = round(100*(sum(is.na(original$value))/nrow(original)), digits = 2), #as a percentage of total rows
+                      mis.meta = prettyNum(sum(is.na(original[!grepl("nodoi", original$doi) & !is.na(original$value),]$journal)), big.mark = ",", preserve.width = "none"), #Number of entries lacking meta-data
+                      mis.metapercent = round(100*(sum(is.na(original[!grepl("nodoi", original$doi) & !is.na(original$value),]$journal)) / nrow(original)), digits = 2), #as a percentage of total rows
+                      entries.final = prettyNum(nrow(dat2), big.mark = ",", preserve.width = "none"),  #Number of p-values after cleaning
+                      entries.finalpercent = round(100*(nrow(dat2) / nrow(original)), digits = 2), #as a percentage of original number of entries
+                      articles.with.p = prettyNum(length(unique(dat$doi)), big.mark = ",", preserve.width = "none"), #number of articles in original dataset (i.e. all articles in APA containing p-values)
+                      articles.final = prettyNum(length(unique(dat2$doi)), big.mark = ",", preserve.width = "none"), #number of articles in final sample
+                      articles.finalpercent = round(100*(length(unique(dat2$doi))/length(unique(dat$doi))), digits = 2), #as a percentage of original number of articles
+                      journals.final = length(unique(dat2$journal)), #number of journals in final sample
+                      corearticles = length(unique(core$doi)), #number of articles unique to the 'core' topic
+                      unique.core = prettyNum(nrow(core), big.mark = ",", preserve.width = "none"), #number of p-values unique to 'core' topic
+                      unique.corepercent = round(100*(nrow(core) / nrow(original)), digits = 2), #as a percentage of total
+                      table1 = df.table1, #table 1
+                      table2 = df.table2, #table 2
+                      
+                      #Results, estimates for the different disciplines and Pritschet et al's results
                       marg.jpsp = round(marg.jpsp, digits = 2),
                       marg.dp = round(marg.dp, digits = 2),
-                      marg.jpsp100 = round(marg.jpsp100, digits = 2),
-                      marg.dp100 = round(marg.dp100, digits = 2),
                       marg.overall = round(marg.overall, digits = 2),
                       marg.clinical = round(marg.clinical, digits = 2),
                       marg.cognitive = round(marg.cognitive, digits = 2),
@@ -344,9 +292,15 @@ marginal_list <- list(entries.original = prettyNum(nrow(original), big.mark = ",
                       marg.health = round(marg.health, digits = 2),
                       marg.organizational = round(marg.organizational, digits = 2),
                       marg.social = round(marg.social, digits = 2),
-                      table1 = df.table1,
-                      table2 = df.table2,
-                      table3 = df.table3)
+                      pritschet.jpsp = round(pritschet.marginal.jpsp, digits = 2),
+                      pritschet.dp = round(pritschet.marginal.dp, digits = 2),
+                      
+                      #Exploratory analysis
+                      marg.p.jpsp.1990.2010 = round(marg.jpsp.1990.2010, digits = 2), #Percent marg. sig. JPSP 3 years our model ####
+                      marg.p.dp.1990.2010 = round(marg.dp.1990.2010, digits = 2), #Percent marg. sig. DP 3 years our model ####
+                      marg.a.jpsp.1990.2010 = round(marg.a.jpsp.1990.2010, digits = 2), #marg. sig. % article level for the three years JPSP ####
+                      marg.a.dp.1990.2010 = round(marg.a.dp.1990.2010, digits = 2) #marg. sig. % article level for the three years DP ####
+                      )
 
 saveRDS(marginal_list, file = "../writing/marginal_rmarkdown_objects.RData")
 
