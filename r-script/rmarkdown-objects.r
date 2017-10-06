@@ -210,6 +210,7 @@ df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive",
 #------------------------------------------
 ##exploratory analyses and objects 
 #------------------------------------------
+
 explore.jpsp <- dat2[dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 1990 | 
                      dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2000 | 
                      dat2$journal == "Journal of Personality and Social Psychology" & dat2$year == 2010,]
@@ -218,34 +219,11 @@ explore.dp <- dat2[dat2$journal == "Developmental Psychology" & dat2$year == 199
                    dat2$journal == "Developmental Psychology" & dat2$year == 2000 | 
                    dat2$journal == "Developmental Psychology" & dat2$year == 2010,]
 
-#to use for number of non. sig. articles (since must contain all p-values)
-explore.jpsp.articles <- dat[dat$journal == "Journal of Personality and Social Psychology" & dat$year == 1990 | 
-                         dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2000 | 
-                         dat$journal == "Journal of Personality and Social Psychology" & dat$year == 2010,]
-
-explore.dp.articles <- dat[dat$journal == "Developmental Psychology" & dat$year == 1990 | 
-                       dat$journal == "Developmental Psychology" & dat$year == 2000 | 
-                       dat$journal == "Developmental Psychology" & dat$year == 2010,]
-
-#Number of marginally significant p-values in JPSP and DP 1990,2000, 2010
-sum(explore.jpsp$marginal)
-sum(explore.dp$marginal)
-
-#Number of articles containing at least one marginally significant result in jpsp and dp for the three years
-a.marg.jpsp.1990.2010 <- length(unique(explore.jpsp$doi[explore.jpsp$marginal == 1]))
-
-a.marg.dp.1990.2010 <- length(unique(explore.dp$doi[explore.dp$marginal == 1]))
-
 #Estimates (proportions) marg. sig. p-values for JPSP and DP using only 1990, 2000, and 2010 data
 
 marg.jpsp.1990.2010 <- 100*(sum(explore.jpsp$marginal)/length(explore.jpsp$result))
 
 marg.dp.1990.2010 <- 100*(sum(explore.dp$marginal) / length(explore.dp$result))
-
-#Estimates article level (equation 2) for JPSP and DP 1990,2000, 2010
-marg.a.jpsp.1990.2010 <- 100*(a.marg.jpsp.1990.2010 / (a.marg.jpsp.1990.2010 + length(unique(explore.jpsp.articles$doi)) - a.marg.jpsp.1990.2010))
-
-marg.a.dp.1990.2010 <- 100*(a.marg.dp.1990.2010 / (a.marg.dp.1990.2010 + length(unique(explore.dp.articles$doi)) - a.marg.dp.1990.2010))
 
 #------------------------------------------
 ##List of objects for r-markdown file
@@ -269,7 +247,7 @@ marginal_list <- list(
                       mis.metapercent = round(100*(sum(is.na(original[!grepl("nodoi", original$doi) & !is.na(original$value),]$journal)) / nrow(original)), digits = 2), #as a percentage of total rows
                       entries.final = prettyNum(nrow(dat2), big.mark = ",", preserve.width = "none"),  #Number of p-values after cleaning
                       entries.finalpercent = round(100*(nrow(dat2) / nrow(original)), digits = 2), #as a percentage of original number of entries
-                      articles.with.p = prettyNum(length(unique(dat$doi)), big.mark = ",", preserve.width = "none"), #number of articles in original dataset (i.e. all articles in APA containing p-values)
+                      articles.with.p = prettyNum(length(unique(dat$doi)), big.mark = ",", preserve.width = "none"), #number of articles in complete dataset (i.e. all articles in APA containing p-values)
                       articles.final = prettyNum(length(unique(dat2$doi)), big.mark = ",", preserve.width = "none"), #number of articles in final sample
                       articles.finalpercent = round(100*(length(unique(dat2$doi))/length(unique(dat$doi))), digits = 2), #as a percentage of original number of articles
                       journals.final = length(unique(dat2$journal)), #number of journals in final sample
@@ -296,10 +274,9 @@ marginal_list <- list(
                       pritschet.dp = round(pritschet.marginal.dp, digits = 2),
                       
                       #Exploratory analysis
-                      marg.p.jpsp.1990.2010 = round(marg.jpsp.1990.2010, digits = 2), #Percent marg. sig. JPSP 3 years our model ####
-                      marg.p.dp.1990.2010 = round(marg.dp.1990.2010, digits = 2), #Percent marg. sig. DP 3 years our model ####
-                      marg.a.jpsp.1990.2010 = round(marg.a.jpsp.1990.2010, digits = 2), #marg. sig. % article level for the three years JPSP ####
-                      marg.a.dp.1990.2010 = round(marg.a.dp.1990.2010, digits = 2) #marg. sig. % article level for the three years DP ####
+                      marg.p.jpsp.1990.2010 = round(marg.jpsp.1990.2010, digits = 2), #Percent marg. sig. JPSP 3 years our model
+                      marg.p.dp.1990.2010 = round(marg.dp.1990.2010, digits = 2), #Percent marg. sig. DP 3 years our model
+                      total.a.without.p.outside.range = prettyNum((length(unique(dat$doi)) - length(unique(dat2$doi))), big.mark = ",", preserve.width = "none") #articles in our sample without .05>p<=.1
                       )
 
 saveRDS(marginal_list, file = "../writing/marginal_rmarkdown_objects.RData")

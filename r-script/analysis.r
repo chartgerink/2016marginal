@@ -144,7 +144,7 @@ p1 <- p + geom_label(data = eq, aes(label = V1), size = 3, x = 1985, y = Inf, hj
                      label.padding = unit(0.12, "lines"), parse = TRUE, inherit.aes = FALSE) +
   facet_wrap(~source) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-  scale_y_continuous(name = expression(paste("% of .05 < ",italic("p"), " <= .1 reported as marginally significant")))
+  scale_y_continuous(limits = c(0,100), name = expression(paste("% of .05 < ",italic("p"), " <= .1 reported as marginally significant")))
 
 #plot2
 
