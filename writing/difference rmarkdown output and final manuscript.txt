@@ -1,0 +1,18 @@
+Differences between rmarkdown output and final manuscript:
+
+- Table layouts and removed repetition of table/figure captions.
+- added a and b superscripts to table 2
+- added double-spacing
+- single-spaceed tables
+- Indented references
+- Added appendices
+- moved SessionInfo to supplementary file
+- Deleted year in subsequent citations when authors have already been cited once in a paragraph
+- De-bolded abstract, paper and reference headers
+- Added running header
+- Added page numbering
+- Added separate appendix page numbering
+- spacing/page breaks
+
+
+

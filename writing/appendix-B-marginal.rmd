@@ -11,7 +11,6 @@ knitr::opts_chunk$set(fig.width=6, fig.height=4, echo=FALSE, warning=FALSE, mess
 marginal <- readRDS("./marginal_rmarkdown_objects.RData")
 ```
 
-##Appendix B: Exploratory analyses
 Our estimates of the incidence of 'marginal significance' in JPSP and DP differ from those of @10.1177/0956797616645672, for which there may be several contributing reasons. We estimated the percentage of 'marginally significant' results in JPSP as `r marginal$marg.jpsp`% vs. @10.1177/0956797616645672's `r marginal$pritschet.jpsp`%, and for DP as `r marginal$marg.dp`% vs. `r marginal$pritschet.dp`%. Two things that might contribute to these differences are: 1) @10.1177/0956797616645672 only observe a few select years and 2) the difference in DVs. We explore these possibilites below.
 
 It may be that @10.1177/0956797616645672 coincidentally only examined years with lower percentages of 'marginally significant' results (see Figure 2 of our manuscript). Of the five years examined by @10.1177/0956797616645672 we used only the data of years 1990, 2000, 2010). However, using the data of only these years our estimates were slightly higher than before and not lower (`r marginal$marg.p.jpsp.1990.2010`% for JPSP and `r marginal$marg.p.dp.1990.2010`% for DP). Consequently, the difference in years examined does not explain the difference in @10.1177/0956797616645672's estimates and ours.
