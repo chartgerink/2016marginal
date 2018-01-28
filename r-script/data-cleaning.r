@@ -1,8 +1,8 @@
 ####Data cleaning - marginally significant results in APA-journals: https://osf.io/28gxz/
 
-#-----------------------------------------------------
-##Startup
-#----------------------------------------------------
+#*******************************************************
+##Marginally significant results dataset----
+#*******************************************************
 #Load dataset
 dat <- read.csv("../data/marginal_dataset.csv", stringsAsFactors = FALSE, strip.white = TRUE)
 #Force dat$value into a numeric variable
@@ -194,6 +194,115 @@ dat.marginal$marginal <- grepl("margin|approach", dat.marginal$pre) | grepl("mar
 
 #Save finished dataset
 write.csv(dat.marginal, file = "../data/final_marginal_dataset.csv", row.names = F)
-
 #----------------------------------------------------
 
+
+
+
+
+#*******************************************************
+##Degrees of freedom dataset----
+#*******************************************************
+df <- read.csv("../data/df_raw_dataset.csv", stringsAsFactors = FALSE)
+
+#-------------------------------------------------------
+##Degrees of freedom cleanup
+#-------------------------------------------------------
+#create unique identfier for each row
+df$X <- 1:nrow(df)
+
+#Rename "source" and identifier for clarity
+names(df)[2] <- "DOI"
+names(df)[1] <- "id"
+
+#remove rows with missing doi (userdefined)
+df <- df[!grepl("nodoi", df$DOI),] #26 rows removed
+
+#remove chisquare and z-tests because they do not provide sufficient information on sample size
+df <- df[!is.na(df$df2),] #71747 rows removed
+
+#Fix the dois so that they correspond to crossref format
+df$doi <- sub("_", "/", df$doi)
+df$doi <- tolower(df$doi)
+
+#-------------------------------------------------------
+##Degrees of freedom download metadata (journal and year)
+#-------------------------------------------------------
+library(rcrossref)
+
+#Done as a loop instead of for all dois at the same time to avoid a time out of the cr_works function
+doi <- unique(df$doi)
+
+doiseq <- seq(1, length(doi), by = 1000)[-1]
+doilist <- split(doi, cumsum(1:length(doi) %in% doiseq)) #list of dois by the thousand
+df.metadata <- vector("list", length = 37) #list to save metadata
+
+#Loop over the dois by the thousand and save metadata for each one. NB! may take some time 
+for(i in seq_along(doilist)){
+  
+  df.metadata[[i]] <- cr_works(dois = doilist[[i]])$data
+  
+}
+
+saveRDS(df.metadata, "df_metadata.RData") #temporarily save the metadata
+df.metadata <- readRDS("df_metadata.RData")
+
+#Remove all variables except doi, year and journal name in the metadata
+df.metadata <- lapply(df.metadata, function(x) x[(names(x) %in% c("DOI", "issued", "container.title"))])
+
+df.metadata <- do.call("rbind", df.metadata) #create one dataframe of the lists with metadata
+
+df <- merge(df, df.metadata, all.x = TRUE) #Add journal and year metadata to original dataframe
+
+#Keep only variables of interest (identifier, doi, Statistic, df2, journal, year)
+df <- df[, names(df) %in% c("id", "DOI", "Statistic", "df2", "issued", "container.title")]
+
+#change column names for clarity
+names(df)[5] <- "journal"
+names(df)[6] <- "year"
+
+#-------------------------------------------------------
+##Degrees of freedom, add information on topics for each journal
+#-------------------------------------------------------
+#check so that all journal names are written correctly
+unique(df$journal) 
+
+#a number of journal names need to be updated for consistency
+df$journal <- gsub("Canadian Journal of Behavioural Science / Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", df$journal)
+df$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", df$journal)
+
+df$journal <- gsub("Canadian Journal of Psychology Revue Canadienne de Psychologie", "Canadian Journal of Experimental Psychology", df$journal)
+df$journal <- gsub("Canadian Journal of Psychology/Revue canadienne de psychologie", "Canadian Journal of Experimental Psychology", df$journal)
+
+df$journal <- gsub("Canadian Psychology/Psychologie canadienne", "Canadian Psychology", df$journal)
+df$journal <- gsub("Canadian Psychology/Psychologie Canadienne", "Canadian Psychology", df$journal)
+
+df$journal <- gsub("Cultural Diversity and Ethnic Minority Psychology", "Cultural Diversity & Ethnic Minority Psychology", df$journal)
+df$journal <- gsub("Cultural Diversity and Mental Health", "Cultural Diversity & Ethnic Minority Psychology", df$journal)
+
+df$journal <- gsub("Journal of Social, Evolutionary, and Cultural Psychology", "Evolutionary Behavioral Sciences", df$journal)
+
+df$journal <- gsub("Professional School Psychology", "School Psychology Quarterly", df$journal)
+
+df$journal <- gsub("Psychological Assessment: A Journal of Consulting and Clinical Psychology", "Psychological Assessment", df$journal)
+
+df$journal <- gsub("Psychomusicology: A Journal of Research in Music Cognition", "Psychomusicology: Music, Mind, and Brain", df$journal)
+df$journal <- gsub("Psychomusicology: Music, Mind and Brain", "Psychomusicology: Music, Mind, and Brain", df$journal)
+
+df$journal <- gsub("Psychosocial Rehabilitation Journal", "Psychiatric Rehabilitation Journal", df$journal)
+
+df$journal <- gsub("Psychotherapy: Theory, Research, Practice, Training", "Psychotherapy", df$journal)
+
+#load file with journal names and APA-topics
+topics <- read.csv2("../data/apa_topics_dummies.csv", header = TRUE, stringsAsFactors = FALSE, strip.white = TRUE)
+
+#Merge with main dataframe
+df <- merge(df, topics, by = "journal")
+
+#Exclude any remaining entries unique to the topic 'core of psychology'
+df <- df[df$Social.Psychology...Social.Processes == 1 | df$Neuroscience...Cognition == 1 | df$Industrial.Organizational.Psychology...Management == 1 |
+           df$Health.Psychology...Medicine == 1 | df$Forensic.Psychology  == 1 | df$Educational.Psychology..School.Psychology...Training == 1 |
+           df$Developmental.Psychology == 1 | df$Clinical.Psychology == 1 | df$Basic...Experimental.Psychology == 1,]
+
+#Save finished dataset
+write.csv(df, file = "../data/final_df_dataset.csv", row.names = F)
