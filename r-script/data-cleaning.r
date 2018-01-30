@@ -261,6 +261,9 @@ df <- df[, names(df) %in% c("id", "DOI", "Statistic", "df2", "issued", "containe
 names(df)[5] <- "journal"
 names(df)[6] <- "year"
 
+unique(df$year) #sometimes both year and month are specified
+
+df$year <- gsub("-\\d*", "", df$year) #substitute "-" and any following digits with nothing
 #-------------------------------------------------------
 ##Degrees of freedom, add information on topics for each journal
 #-------------------------------------------------------
