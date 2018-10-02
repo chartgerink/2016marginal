@@ -29,41 +29,64 @@ dat2 <- dat2[!(dat2$value == 0.1 & dat2$comparison == ">"),]
 #Add a variable indicating whether a p-value appears to reported as marginally significant to restricted dataset
 dat2$marginal <- grepl("margin|approach", dat2$pre) | grepl("margin|approach", dat2$post)
 
+
 #------------------------------------------
-##Table for comparison with current paper and Pritschet et al (2016) - JPSP and DP
+##Our dataset summarized at the article level
+#------------------------------------------
+#Create dataset at the article level with marginal indicator in 4 steps
+#1) merge full with restricted dataset to get dummy for marginal significance
+dat.a <- merge(dat2, dat, all.y = TRUE) #NB! note that dat and dat2 are switched compared to plot file.. (do not work on these at the same time)
+
+#2) Switch NA-values to zeroes (i.e. for all values not in the .05-.1 range)
+dat.a$marginal <- ifelse(is.na(dat.a$marginal), 0, dat.a$marginal)
+
+#3)Aggregate to the article level, keeping all variables of interest
+dat.a <- aggregate(marginal ~ doi + journal + Social.Psychology...Social.Processes + Basic...Experimental.Psychology +
+                    Clinical.Psychology  + Developmental.Psychology + Educational.Psychology..School.Psychology...Training +
+                    Forensic.Psychology + Health.Psychology...Medicine + Industrial.Organizational.Psychology...Management +
+                    Neuroscience...Cognition, data = dat.a, FUN = sum)
+#Note: Here we keep "journal" instead of "year" as we did for the plots
+
+#4)create a dummy to indicate if an article contains at least one marginally significant p-value (.05 - .1)
+dat.a$marginal <- ifelse(dat.a$marginal > 0, 1, 0) 
+names(dat.a)[names(dat.a) == "marginal"] <- "a.marginal"
+#Note: previous to this step we had the _number_ of marginally significant values per article
+
+#------------------------------------------
+##Table for comparison with our data and Pritschet et al (2016) - JPSP and DP
 #------------------------------------------
 
-#Number of articles current paper
+#Number of articles our data
   
 a.jpsp <- length(unique(dat$doi[dat$journal == "Journal of Personality and Social Psychology"]))
 
 a.dp <- length(unique(dat$doi[dat$journal == "Developmental Psychology"]))
 
-#Number of p-values current paper
+#Number of p-values our data
 
 p.jpsp <- length(dat$result[dat$journal == "Journal of Personality and Social Psychology"])
   
 p.dp <- length(dat$result[dat$journal == "Developmental Psychology"])
      
-#Number of p-values/article current paper
+#Number of p-values/article our data
   
 results.jpsp <- round(length(dat$result[dat$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2)
 
   
 results.dp <- round(length(dat$result[dat$journal == "Developmental Psychology"]) / a.dp, digits = 2)
 
-#number of p-values .05 < p <= .1 current paper
+#number of p-values .05 < p <= .1 our data
   
 p.limited.jpsp <- length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"])
   
 p.limited.dp <- length(dat2$result[dat2$journal == "Developmental Psychology"])
 
-#Number of .05 < p <= .1 per article current paper
+#Number of .05 < p <= .1 per article our data
 limited.a.jpsp <- round(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2)
   
 limited.a.dp <- round(length(dat2$result[dat2$journal == "Developmental Psychology"]) / a.dp, digits = 2)
  
-#Percentage of .05 < p <= .1 marginally significant current paper
+#Percentage of .05 < p <= .1 marginally significant our data
 
 marg.jpsp <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and Social Psychology"]) /
                       length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"]))
@@ -71,8 +94,14 @@ marg.jpsp <- 100*(sum(dat2$marginal[dat2$journal == "Journal of Personality and 
 marg.dp <- 100*(sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) /
                       length(dat2$result[dat2$journal == "Developmental Psychology"]))
 
+#Percentage of articles containing at least one marginally significant p-value our data
+marg.jpsp.a <- 100*(sum(dat.a$a.marginal[dat.a$journal == "Journal of Personality and Social Psychology"]) /
+                      length(dat.a$doi[dat.a$journal == "Journal of Personality and Social Psychology"]))
+
+marg.dp.a <- 100*(sum(dat.a$a.marginal[dat.a$journal == "Developmental Psychology"]) /
+                  length(dat.a$doi[dat.a$journal == "Developmental Psychology"]))
    
-#Data frame of current paper data JSPS and DP
+#Data frame of our data JSPS and DP
 df.rep <- data.frame("Journal" = c("JPSP", "DP"), "Time.span" = rep("1985 - 2016", 2), 
                   "Articles" = c(prettyNum(a.jpsp, big.mark = ",", preserve.width = "none"), 
                                  prettyNum(a.dp, big.mark = ",", preserve.width = "none")), 
@@ -80,7 +109,8 @@ df.rep <- data.frame("Journal" = c("JPSP", "DP"), "Time.span" = rep("1985 - 2016
                                                  paste0(prettyNum(p.dp, big.mark = ",", preserve.width = "none"), " (", results.dp, ")")),
                   "0.05.p.0.1.and.per.article" = c(paste0(prettyNum(p.limited.jpsp, big.mark = ",", preserve.width = "none"), " (", limited.a.jpsp, ")"), 
                                                    paste0(prettyNum(p.limited.dp, big.mark = ",", preserve.width = "none"), " (", limited.a.dp, ")")), 
-                  "percent.marginal" = round(c(marg.jpsp, marg.dp), digits = 2))
+                  "p.percent.marginal" = round(c(marg.jpsp, marg.dp), digits = 2),
+                  "a.percent.marginal" = round(c(marg.jpsp.a, marg.dp.a), digits = 2))
 
 #Load data from Pritschet et al (2016)
 if(!require(readxl)){install.packages("readxl")}
@@ -106,15 +136,16 @@ df.pritschet <- data.frame("Journal" = c("JPSP", "DP"), "Time.span" = rep("1970 
                   "Articles" = as.factor(c(pritschet.articles.jpsp, pritschet.articles.dp)),
                   "P-values.and.per.article" = rep(NA,2),
                   "0.05.p.0.1.and.per.article" = rep(NA,2),
-                  "percent.marginal" = round(c(pritschet.marginal.jpsp, pritschet.marginal.dp), digits = 2))
+                  "p.percent.marginal" = c(NA, NA),
+                  "a.percent.marginal" = round(c(pritschet.marginal.jpsp, pritschet.marginal.dp), digits = 2))
 
 
-##Merge current paper and Pritchet dataframes
+##Merge our data and Pritchet dataframes
 
 df.table2 <- rbind(df.rep, df.pritschet)
 
 #-------------------------------------------------------
-##Table for subfields and overall (current paper data)
+##Table for subfields and overall (our data)
 #-------------------------------------------------------
 
 #p-values per article
@@ -141,7 +172,7 @@ p.limited.health <- round(length(dat2$result[dat2$Health.Psychology...Medicine =
 p.limited.organizational <- round(length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]) / length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), digits = 2)
 p.limited.social <- round(length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]) / length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])), digits = 2)
 
-#marginally significant (%)
+#Percentage of .05 < p <= .1 marginally significant
 marg.overall <- 100*(sum(dat2$marginal) / length(dat2$result))
 
 marg.clinical <- 100*(sum(dat2$marginal[dat2$Clinical.Psychology == 1]) / length(dat2$result[dat2$Clinical.Psychology == 1]))
@@ -161,6 +192,22 @@ marg.health <- 100*(sum(dat2$marginal[dat2$Health.Psychology...Medicine == 1]) /
 marg.organizational <- 100*(sum(dat2$marginal[dat2$Industrial.Organizational.Psychology...Management == 1]) / length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]))
  
 marg.social <- 100*(sum(dat2$marginal[dat2$Social.Psychology...Social.Processes == 1]) / length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]))
+
+#Percentage of articles containing at least one marginally significant p-value
+overall.marg.a <- 100*(sum(dat.a$a.marginal) / length(dat.a$doi))
+
+dat.a <- dat.a[, c(3:11, 1, 2, 12)] #reorder to facilitate loop below
+
+sub.marg.a <- rep(NA, 9)
+
+for(i in 1:9){
+ sub.marg.a[i] <- 100*(sum(dat.a$a.marginal[dat.a[[i]] == 1]) / length(dat.a$doi[dat.a[[i]] == 1]))
+}
+
+#Make sure results are in alphabetical order
+sub.marg.a <- data.frame(sub.marg.a, disc = c("Social", "Experimental", "Clinical", "Developmental", "Educational",
+  "Forensic", "Health","Organizational", "Cognitive"))
+sub.marg.a <- sub.marg.a[order(sub.marg.a2[["disc"]]),]
 
 #Dataframe for table
 df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Developmental", "Educational",
@@ -205,8 +252,9 @@ df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive",
                                                      paste0(prettyNum(length(dat2$result[dat2$Health.Psychology...Medicine == 1]), big.mark = ",", preserve.width = "none"), " (", p.limited.health, ")"),
                                                      paste0(prettyNum(length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]), big.mark = ",", preserve.width = "none"), " (", p.limited.organizational, ")"),
                                                      paste0(prettyNum(length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]), big.mark = ",", preserve.width = "none"), " (", p.limited.social, ")")),
-                           "percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
-                                                         marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2))
+                           "p.percent.marginal" = round(c(marg.overall, marg.clinical, marg.cognitive, marg.developmental, marg.educational,
+                                                         marg.experimental, marg.forensic, marg.health, marg.organizational, marg.social), digits = 2),
+                        "a.percent.marginal" = round(c(overall.marg.a, sub.marg.a[,1]), digits = 2))
 #------------------------------------------
 ##exploratory analyses and objects 
 #------------------------------------------
@@ -322,6 +370,36 @@ nrow(dat2)
 #Test sample
 nrow(read.csv("../data/test_sample_marginal_dataset.csv", stringsAsFactors = FALSE))
 100*(nrow(read.csv("../data/test_sample_marginal_dataset.csv", stringsAsFactors = FALSE)) / nrow(dat2)) #%
+
+
+#------------------------------------------
+##Degrees of freedom flowchart values
+#------------------------------------------
+df <- read.csv("../data/df_raw_dataset.csv", stringsAsFactors = FALSE)
+df2 <- read.csv("../data/final_df_dataset.csv", stringsAsFactors = FALSE)
+
+#extracted APA-results
+nrow(df)
+
+#Excluded for missing doi
+sum(grepl("nodoi", df$Source))
+100*(sum(grepl("nodoi", df$Source)) / nrow(df))
+
+#Excluded because using Z- or chisquared statistics
+sum(is.na(df$df2))
+100*(sum(is.na(df$df2)) / nrow(df))
+
+#remaining results
+nrow(df) - sum(grepl("nodoi", df$Source)) - sum(is.na(df$df2))
+100*((nrow(df) - sum(grepl("nodoi", df$Source)) - sum(is.na(df$df2))) / nrow(df))
+
+#Excluded 'core of psychology'
+nrow(df) -  sum(grepl("nodoi", df$Source)) - sum(is.na(df$df2)) - nrow(df2)
+100*((nrow(df) -  sum(grepl("nodoi", df$Source)) - sum(is.na(df$df2)) - nrow(df2)) / nrow(df))
+
+#final df dataset
+nrow(df2)
+100*(nrow(df2) / nrow(df))
 
 #----------------------------------------------
 #End
