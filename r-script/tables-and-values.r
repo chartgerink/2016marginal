@@ -207,7 +207,7 @@ for(i in 1:9){
 #Make sure results are in alphabetical order
 sub.marg.a <- data.frame(sub.marg.a, disc = c("Social", "Experimental", "Clinical", "Developmental", "Educational",
   "Forensic", "Health","Organizational", "Cognitive"))
-sub.marg.a <- sub.marg.a[order(sub.marg.a2[["disc"]]),]
+sub.marg.a <- sub.marg.a[order(sub.marg.a[["disc"]]),]
 
 #Dataframe for table
 df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Developmental", "Educational",
