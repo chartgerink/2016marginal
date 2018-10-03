@@ -29,7 +29,7 @@ dat3 <- merge(dat, dat2, all.y = TRUE)
 dat3$marginal <- ifelse(is.na(dat3$marginal), 0, dat3$marginal)
 
 #3)Aggregate to the article level, keeping all variables of interest
-dat3 <- aggregate(marginal ~ doi + year + Social.Psychology...Social.Processes + Basic...Experimental.Psychology +
+dat3 <- aggregate(marginal ~ doi + journal + year + Social.Psychology...Social.Processes + Basic...Experimental.Psychology +
                     Clinical.Psychology  + Developmental.Psychology + Educational.Psychology..School.Psychology...Training +
                     Forensic.Psychology + Health.Psychology...Medicine + Industrial.Organizational.Psychology...Management +
                     Neuroscience...Cognition, data = dat3, FUN = sum)
@@ -40,12 +40,38 @@ names(dat3)[names(dat3) == "marginal"] <- "a.marginal"
 
 
 #For all dataframes drop redundant variables and reorder columns to facilitate aggregation in next section
-dat <- dat[, !(names(dat) %in% c("Core.of.Psychology", "journal", "doi", "pre", "post", "comparison", "value"))]
-dat2 <- dat2[, !(names(dat2) %in% c("Core.of.Psychology", "journal", "doi", "pre", "post", "comparison", "value"))]
-dat <- dat[, c(3:11, 1, 2, 12)]
-dat2 <- dat2[, c(3:11, 1, 2)]
-dat3 <- dat3[, c(3:11, 1, 2, 12)]
+dat <- dat[, !(names(dat) %in% c("Core.of.Psychology", "doi", "pre", "post", "comparison", "value"))]
+dat2 <- dat2[, !(names(dat2) %in% c("Core.of.Psychology", "doi", "pre", "post", "comparison", "value"))]
+dat <- dat[, c(4:12, 1:3, 13)] 
+dat2 <- dat2[, c(4:12, 1:3)]
+dat3 <- dat3[, c(4:12, 1:3, 13)]
 names(dat2)[names(dat2) == "result"] <- "all.result" #name-change to avoid later confusion
+
+#---------------------------------------------------------------------
+##Dataframes with proportion of marginal results (p-values&articles) per year for JPSP and 'Developmental Psychology'
+#---------------------------------------------------------------------
+jpsp.sum <- Reduce(function(x, y) merge(x, y, all=TRUE), 
+                   list(aggregate(result ~ year, data = dat[dat$journal == "Journal of Personality and Social Psychology",], FUN = length),
+                        aggregate(marginal ~ year, data = dat[dat$journal == "Journal of Personality and Social Psychology",], FUN = sum),
+                        aggregate(doi ~ year, data = dat3[dat3$journal == "Journal of Personality and Social Psychology",], FUN = length),
+                        aggregate(a.marginal ~ year, data = dat3[dat3$journal == "Journal of Personality and Social Psychology",], FUN = sum)))
+
+jpsp.sum$percentage.marginal <- 100*(jpsp.sum$marginal/jpsp.sum$result)
+jpsp.sum$a.percentage.marginal <- 100*(jpsp.sum$a.marginal/jpsp.sum$doi)
+
+dp.sum <- Reduce(function(x, y) merge(x, y, all=TRUE),
+                 list(aggregate(result ~ year, data = dat[dat$journal == "Developmental Psychology",], FUN = length),
+                      aggregate(marginal ~ year, data = dat[dat$journal == "Developmental Psychology",], FUN = sum),
+                      aggregate(doi ~ year, data = dat3[dat3$journal == "Developmental Psychology",], FUN = length),
+                      aggregate(a.marginal ~ year, data = dat3[dat3$journal == "Developmental Psychology",], FUN = sum)))
+
+dp.sum$percentage.marginal <- 100*(dp.sum$marginal/dp.sum$result)
+dp.sum$a.percentage.marginal <- 100*(dp.sum$a.marginal/dp.sum$doi)
+
+#Combine into one dataframe for graphing
+
+replication.sum <- combine(dp.sum, jpsp.sum)
+replication.sum$source <- factor(replication.sum$source, labels = c("DP", "JPSP"))
 
 #---------------------------------------------------------------------
 ##Dataframes with proportion of marginal p-values (.05 - .1) and articles (>0 marg. p-values) per year for different subfields
@@ -91,30 +117,120 @@ results.sum$source <- rep(c("Social", "Experimental", "Clinical", "Developmental
 #Combine overall and by subfield for plotting
 results.sum <- rbind(results.sum, dat.sum)
 results.sum$source <- factor(results.sum$source) #prepare for plotting
+
+
  
 #-------------------------------------------------------
 ##Linear models and plots
 #-------------------------------------------------------
 if(!require(ggplot2)){install.packages("ggplot2")}
 if(!require(plyr)){install.packages("plyr")}
+if(!require(cowplot)){install.packages("cowplot")}
 library(ggplot2)
 library(plyr)
+library(cowplot)
 
 #Function for statistics to label graphs with
 
 lm_eqn = function(df){
   m = lm(percentage.marginal ~ year, df);
   eq <- substitute(paste(italic(p), "-values: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[2], digits = 2)))
+                   list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                
 }
 
 lm_eqn2 = function(df){
   m = lm(a.percentage.marginal ~ year, df);
   eq <- substitute(paste("articles: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[2], digits = 2)))
+                   list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                 
 }
+
+#------------------------------------------------
+#Plots of JPSP and DP 
+#------------------------------------------------
+#marginal significance over time p-values & articles
+
+eq <- ddply(replication.sum, .(source), lm_eqn)
+eq2 <- ddply(replication.sum, .(source), lm_eqn2)
+
+#controls location of labels in combination with geom_text
+replication.sum$pmlabel <- ifelse(replication.sum$year == 2014, "p-values", NA)
+replication.sum$amlabel <- ifelse(replication.sum$year == 2014, "articles", NA)
+
+#Base for facet_wrap
+p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
+  geom_line(linetype = "solid") +
+  geom_text(aes(y = percentage.marginal + 15, x = 2005, label = pmlabel), size = 3.5, na.rm= TRUE) +
+  geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
+  geom_text(aes(y = a.percentage.marginal - 15, x = 2005, label = amlabel), size = 3.5, na.rm= TRUE) +
+  annotate("rect", xmin = -Inf, ymin = 95, xmax = 1998, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  theme(strip.text = element_text(face = "bold"), 
+        axis.title.y = element_text(size = 12), 
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        panel.background = element_rect(fill = "white"),
+        strip.background = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
+
+#Facet wrap by journal
+p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.5, x = 1985 - 1, y = 99, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE) + 
+  geom_text(data = eq, aes(label = V1), size = 3.5, x = 1985 - 1, y = 100 + 4, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
+  facet_wrap(~source, ncol = 3) +
+  scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
+  scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL), limits = c(0,100),
+                     name = "% reported as marginally significant")
+
+#Add plot of p (.05 - .1) over time for JPSP and DP
+replication.sum$years2 <- rep(1:16, each = 2) #averaged over 2 years because JPSP very jagged
+replication.sum$years2avg <- rep(aggregate(result ~ years2 + source, data = replication.sum, FUN = mean)$result, each = 2)
+
+#outcome variable different, hence different function
+lm_eqn.p = function(df){
+  m = lm(result ~ year, df);
+  eq <- substitute(paste(italic(b) == beta), 
+                   list(beta = round(coef(m)[[2]], digits = 2)))
+  as.character(as.expression(eq));                
+}
+
+eq.p <- ddply(replication.sum, .(source), lm_eqn.p)
+
+#Base plot for faceting
+p.over.time <- ggplot(replication.sum, aes(x = year, y = years2avg)) +
+  geom_area(linetype = "solid") +
+  annotate("rect", xmin = -Inf, ymin = 355, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  theme(strip.text = element_text(face = "bold"), 
+        axis.title.y = element_text(size = 12),
+        axis.title.x = element_text(size = 12),
+        axis.text = element_text(size = 9),
+        panel.background = element_rect(fill = "white"),
+        strip.background = element_blank(),
+        strip.text.x = element_blank(),
+        panel.grid = element_blank(),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
+
+#Facet wrap by journal
+p2.over.time <- p.over.time + 
+  geom_text(data = eq.p, aes(label = V1), size = 3.5, x = 1985 - 1, y = 390, 
+            hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
+  facet_wrap(~source, ncol = 2) +
+  scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
+  scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
+                     name = expression(paste("# ", italic("p"), "-values reported (.05 - .1)")))
+
+#Combine the plot for marginal significance and number of p-values over time
+combo <- ggdraw() +
+  draw_plot(p2, x = 0, y = .3, width = 1, height = .7) +
+  draw_plot(p2.over.time, x = 0, y = 0, width = 1, height = .325)
+
+#save_plot("../figures/jpsp-dp.png", plot = combo, base_width = 7, base_height = 7, dpi = 600)
+
+#------------------------------------------------
+#Plot of disciplines and all journals
+#------------------------------------------------
 
 #marginally significant results over time
 results.sum$pmlabel <- ifelse(results.sum$year == 2016, "p-values", NA)
@@ -160,9 +276,11 @@ g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("str
 grid.newpage()
 grid.draw(g)
 
-ggsave("marginal.png", plot = g, width = 7, height = 7, dpi = 600)
+#ggsave("../figures/marginal.png", plot = g, width = 7, height = 7, dpi = 600)
 
-#------------------------------------------------
+#***********************************
+#Additional alternative plots----
+#***********************************
 #number of p-values between .05 and .1
 if(!require(ggrepel)){install.packages("ggrepel")}
 library(ggrepel)
@@ -171,7 +289,7 @@ library(ggrepel)
 lm_eqn3 = function(stat, df){
   m = lm(stat ~ year, df);
   eq <- substitute(paste("All APA Journals: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[2], digits = 2)))
+                   list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                
 }
 
@@ -272,3 +390,7 @@ p.df <- ggplot(results.df, aes(x = year, y = df2, group = source, alpha = source
         axis.text = element_text(size = 9))
 
 #ggsave("df_plot.pdf", width = 7, height = 7) #fix the settings of the save
+
+###Temporary files
+saveRDS(p.df, "p.df.RData")
+saveRDS(g, "marginals.RData")
