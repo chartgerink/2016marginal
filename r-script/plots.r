@@ -184,8 +184,8 @@ p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.5, x = 1985 - 1, y = 9
   scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL), limits = c(0,100),
                      name = "% reported as marginally significant")
 
-#Add plot of p (.05 - .1) over time for JPSP and DP
-replication.sum$years2 <- rep(1:16, each = 2) #averaged over 2 years because JPSP very jagged
+#Add plot of p (.05 - .1) over time for JPSP and DP averaged over 2 years because JPSP very jagged
+replication.sum$years2 <- rep(1:16, each = 2) #averaging
 replication.sum$years2avg <- rep(aggregate(result ~ years2 + source, data = replication.sum, FUN = mean)$result, each = 2)
 
 #outcome variable different, hence different function
@@ -276,14 +276,16 @@ g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("str
 grid.newpage()
 grid.draw(g)
 
-#ggsave("../figures/marginal.png", plot = g, width = 7, height = 7, dpi = 600)
+#ggsave("../figures/disciplines.png", plot = g, width = 7, height = 7, dpi = 600)
 
 #***********************************
-#Additional alternative plots----
+#df plot----
 #***********************************
-#number of p-values between .05 and .1
-if(!require(ggrepel)){install.packages("ggrepel")}
-library(ggrepel)
+#library(ggrepel)
+#library(plyr)
+#library(ggplot2)
+
+df <- read.csv("../data/final_df_dataset.csv", stringsAsFactors = FALSE)
 
 #Function for labelling solo figures
 lm_eqn3 = function(stat, df){
@@ -293,7 +295,69 @@ lm_eqn3 = function(stat, df){
   as.character(as.expression(eq));                
 }
 
-p3.eq <- lm_eqn3(results.sum$result, results.sum) #linear model
+
+
+# drop redundant variables and reorder columns to facilitate aggregation
+df <- df[, !(names(df) %in% c("Core.of.Psychology", "journal", "DOI", "Statistic", "id"))]
+df <- df[, c(3:11, 1, 2)]
+
+#Aggregate overall
+
+df.sum <- aggregate(df2 ~ year, data = df, FUN = median)
+
+df.sum$source <- "All APA Journals"
+
+df.sum$years2avg <- df.sum$df2 #This is to be able to plot overall together with disciplines but w/o averaging it
+
+#By subfield
+
+df.collect <- vector("list", length = 9)
+
+for(i in 1:9) { #loop over all subfields
+  df.collect[[i]] <- aggregate(df2 ~ year, data = df[df[[i]] == 1,], FUN = median)
+}
+
+results.df <- do.call("rbind", df.collect) #Combine into one dataframe
+
+results.df$source <- rep(c("Social", "Experimental", "Clinical", "Developmental", "Educational",
+                            "Forensic", "Health","Organizational", "Cognitive"), sapply(df.collect, nrow)) #add data providence to new dataframe
+
+results.df$years2 <- rep(1:16, each = 2) #averaging per two years because very jagged lines
+results.df$years2avg <- rep(aggregate(df2 ~ years2 + source, data = results.df, FUN = mean)$df2, each = 2)
+results.df$years2 <- NULL #remove to be able to rbind with overall dataframe
+
+#Combine overall and by discipline for plotting
+results.df<- rbind(results.df, df.sum)
+results.df$source <- factor(results.df$source) #prepare for plotting
+
+df.eq <- lm_eqn3(results.df$df2, results.df) #linear model
+
+results.df$plabel <- ifelse(results.df$year == 2015, as.character(results.df$source), NA) #used for labelling at endpoints, because # of datapoints must match
+
+plot.df <- ggplot(results.df, aes(x = year, y = years2avg, group = source, alpha = source)) +
+  geom_line() +
+  annotate("label", x = -Inf, y = Inf, label = df.eq, parse = TRUE, size = 3.5, hjust = 0, vjust = 1) +
+  geom_text_repel(aes(label = plabel), nudge_x = 3.5, na.rm = TRUE, size = 3, segment.alpha = 0.3) +
+  scale_alpha_manual(guide = FALSE, values = c(1, rep(0.3, 9))) +
+  scale_color_discrete(guide = FALSE) +
+  coord_cartesian(xlim = c(1985, 2016 + 4)) +
+  scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
+  scale_y_continuous(name = "Median degrees of freedom", breaks = c(20, 70, 120, 170)) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"),
+        axis.title = element_text(size = 12), 
+        axis.text = element_text(size = 9))
+
+# ggsave("../figures/df_plot.png", plot = plot.df, width = 7, height = 7, dpi = 600)
+
+#***********************************
+#Additional alternative plots----
+#***********************************
+#number of p-values between .05 and .1
+if(!require(ggrepel)){install.packages("ggrepel")}
+library(ggrepel)
+
+p3.eq <- lm_eqn3(results.sum$result, results.sum) #linear model, equation from line 291
 
 results.sum$plabel <- ifelse(results.sum$year == 2015, as.character(results.sum$source), NA) #used for labelling at endpoints, because # of datapoints must match
 
@@ -336,61 +400,3 @@ res <- cowplot::plot_grid(p4, p3, labels = "AUTO", ncol = 1)
 #save_plot("p-values.pdf", res, ncol = 1, nrow = 2, base_aspect_ratio = 1.4, base_height = 5)
 
 
-#***********************************
-#df plots----
-#***********************************
-library(ggrepel)
-library(plyr)
-library(ggplot2)
-df <- read.csv("../data/final_df_dataset.csv", stringsAsFactors = FALSE)
-
-# drop redundant variables and reorder columns to facilitate aggregation
-df <- df[, !(names(df) %in% c("Core.of.Psychology", "journal", "DOI", "Statistic", "id"))]
-df <- df[, c(3:11, 1, 2)]
-
-#Aggregate overall
-
-df.sum <- aggregate(df2 ~ year, data = df, FUN = median)
-
-df.sum$source <- "All APA Journals" 
-
-#By subfield
-
-df.collect <- vector("list", length = 9)
-
-for(i in 1:9) { #loop over all subfields
-  df.collect[[i]] <- aggregate(df2 ~ year, data = df[df[[i]] == 1,], FUN = median)
-}
-
-results.df <- do.call("rbind", df.collect) #Combine into one dataframe
-
-results.df$source <- rep(c("Social", "Experimental", "Clinical", "Developmental", "Educational",
-                            "Forensic", "Health","Organizational", "Cognitive"), sapply(df.collect, nrow)) #add data providence to new dataframe
-
-#Combine overall and by discipline for plotting
-results.df<- rbind(results.df, df.sum)
-results.df$source <- factor(results.df$source) #prepare for plotting
-
-df.eq <- lm_eqn3(results.df$df2, results.df) #linear model, function from end of previous section (line 170)
-
-results.df$plabel <- ifelse(results.df$year == 2015, as.character(results.df$source), NA) #used for labelling at endpoints, because # of datapoints must match
-
-p.df <- ggplot(results.df, aes(x = year, y = df2, group = source, alpha = source)) +
-  geom_line() +
-  annotate("label", x = -Inf, y = Inf, label = df.eq, parse = TRUE, size = 3, hjust = 0, vjust = 1) +
-  geom_text_repel(aes(label = plabel), nudge_x = 3.5, na.rm = TRUE, size = 3, segment.alpha = 0.3) +
-  scale_alpha_manual(guide = FALSE, values = c(1, rep(0.3, 9))) +
-  scale_color_discrete(guide = FALSE) +
-  coord_cartesian(xlim = c(1985, 2016 + 4)) +
-  scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-  scale_y_continuous(name = "Median degrees of freedom", breaks = c(20, 70, 120, 170)) +
-  theme(panel.background = element_rect(fill = "white"),
-        panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"),
-        axis.title = element_text(size = 9), 
-        axis.text = element_text(size = 9))
-
-#ggsave("df_plot.pdf", width = 7, height = 7) #fix the settings of the save
-
-###Temporary files
-saveRDS(p.df, "p.df.RData")
-saveRDS(g, "marginals.RData")
