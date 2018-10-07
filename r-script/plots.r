@@ -218,7 +218,7 @@ p2.over.time <- p.over.time +
             hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, ncol = 2) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-  scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
+  scale_y_continuous(breaks = c(0, 1, 2, 3), labels = c("   0","1","2","3"), sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
                      name = expression(paste(italic("p"), "-values (.05 - .1) per article")))
 
 #Combine the plot for marginal significance and number of p-values over time
