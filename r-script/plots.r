@@ -73,6 +73,10 @@ dp.sum$a.percentage.marginal <- 100*(dp.sum$a.marginal/dp.sum$doi)
 replication.sum <- combine(dp.sum, jpsp.sum)
 replication.sum$source <- factor(replication.sum$source, labels = c("DP", "JPSP"))
 
+#Add p-values (.05 - .1) per year
+replication.sum$p.per.a <- replication.sum$result / replication.sum$doi
+
+
 #---------------------------------------------------------------------
 ##Dataframes with proportion of marginal p-values (.05 - .1) and articles (>0 marg. p-values) per year for different subfields
 #---------------------------------------------------------------------
@@ -117,8 +121,6 @@ results.sum$source <- rep(c("Social", "Experimental", "Clinical", "Developmental
 #Combine overall and by subfield for plotting
 results.sum <- rbind(results.sum, dat.sum)
 results.sum$source <- factor(results.sum$source) #prepare for plotting
-
-
  
 #-------------------------------------------------------
 ##Linear models and plots
@@ -184,13 +186,11 @@ p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.5, x = 1985 - 1, y = 9
   scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL), limits = c(0,100),
                      name = "% reported as marginally significant")
 
-#Add plot of p (.05 - .1) over time for JPSP and DP averaged over 2 years because JPSP very jagged
-replication.sum$years2 <- rep(1:16, each = 2) #averaging
-replication.sum$years2avg <- rep(aggregate(result ~ years2 + source, data = replication.sum, FUN = mean)$result, each = 2)
+#Add plot of average p (.05 - .1)/article over time for JPSP and DP
 
 #outcome variable different, hence different function
 lm_eqn.p = function(df){
-  m = lm(result ~ year, df);
+  m = lm(p.per.a ~ year, df);
   eq <- substitute(paste(italic(b) == beta), 
                    list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                
@@ -199,9 +199,9 @@ lm_eqn.p = function(df){
 eq.p <- ddply(replication.sum, .(source), lm_eqn.p)
 
 #Base plot for faceting
-p.over.time <- ggplot(replication.sum, aes(x = year, y = years2avg)) +
+p.over.time <- ggplot(replication.sum, aes(x = year, y = p.per.a)) +
   geom_area(linetype = "solid") +
-  annotate("rect", xmin = -Inf, ymin = 355, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  annotate("rect", xmin = -Inf, ymin = 3.1, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
   theme(strip.text = element_text(face = "bold"), 
         axis.title.y = element_text(size = 12),
         axis.title.x = element_text(size = 12),
@@ -214,12 +214,12 @@ p.over.time <- ggplot(replication.sum, aes(x = year, y = years2avg)) +
 
 #Facet wrap by journal
 p2.over.time <- p.over.time + 
-  geom_text(data = eq.p, aes(label = V1), size = 3.5, x = 1985 - 1, y = 390, 
+  geom_text(data = eq.p, aes(label = V1), size = 3.5, x = 1985 - 1, y = 3.5, 
             hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, ncol = 2) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
   scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
-                     name = expression(paste("# ", italic("p"), "-values reported (.05 - .1)")))
+                     name = expression(paste(italic("p"), "-values (.05 - .1) per article")))
 
 #Combine the plot for marginal significance and number of p-values over time
 combo <- ggdraw() +
