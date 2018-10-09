@@ -309,3 +309,83 @@ df <- df[df$Social.Psychology...Social.Processes == 1 | df$Neuroscience...Cognit
 
 #Save finished dataset
 write.csv(df, file = "../data/final_df_dataset.csv", row.names = F)
+
+#*************************************
+##Metadata for all articles, even without any p-values
+#*************************************
+
+setwd("../data/metadata")
+filenames <- list.files(pattern = "*.csv") #load all files
+
+all.meta <- lapply(filenames, read.csv, stringsAsFactors = FALSE, header = FALSE,
+                   col.names = c("journal", "year"))
+
+all.meta <- do.call(rbind, all.meta)
+
+#Add doi
+doi.all <- gsub(".csv", "", filenames) 
+all.meta$doi <- doi.all
+
+setwd("../../r-script")
+#-------------------------------------------------------
+##all journals even without p-values, add information on topics for each journal
+#-------------------------------------------------------
+#a number of journal names need to be updated for consistency
+
+all.meta$journal <- gsub("Canadian Journal Of Behavioural Science", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des Sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science / Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science Revue canadienne des Sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des Sciences du comportement" , "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science / Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Behavioural Science/Revue canadienne des sciences du comportement", "Canadian Journal of Behavioural Science", all.meta$journal)
+
+all.meta$journal <- gsub("Canadian Journal of Experimental Psychology/Revue canadienne de psychologie exp�rimentale", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Psychology Revue Canadienne de Psychologie", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Psychology/Revue canadienne de psychologie", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Experimental Psychology/Revue canadienne de psychologie expérimentale", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Psychology/Revue canadienne de psychologie", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Psychology Revue Canadienne de Psychologie", "Canadian Journal of Experimental Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Journal of Experimental Psychology/Revue canadienne de psychologie expérimentale", "Canadian Journal of Experimental Psychology", all.meta$journal)
+
+all.meta$journal <- gsub("Canadian Psychology Psychologie Canadienne", "Canadian Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Psychology/Psychologie canadienne", "Canadian Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Psychology/Psychologie Canadienne", "Canadian Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Psychology Psychologie Canadienne", "Canadian Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Psychology/Psychologie Canadienne", "Canadian Psychology", all.meta$journal)
+all.meta$journal <- gsub("Canadian Psychology/Psychologie canadienne", "Canadian Psychology", all.meta$journal)
+
+all.meta$journal <- gsub("Cultural Diversity & Mental Health", "Cultural Diversity & Ethnic Minority Psychology", all.meta$journal)
+all.meta$journal <- gsub("Cultural Diversity and Ethnic Minority Psychology", "Cultural Diversity & Ethnic Minority Psychology", all.meta$journal)
+all.meta$journal <- gsub("Cultural Diversity and Mental Health", "Cultural Diversity & Ethnic Minority Psychology", all.meta$journal)
+
+all.meta$journal <- gsub("Journal of Experimental Psychology: Human Perception & Performance", "Journal of Experimental Psychology: Human Perception and Performance", all.meta$journal)
+
+all.meta$journal <- gsub("Journal of Social, Evolutionary, and Cultural Psychology", "Evolutionary Behavioral Sciences", all.meta$journal)
+
+all.meta$journal <- gsub("Professional School Psychology", "School Psychology Quarterly", all.meta$journal)
+
+all.meta$journal <- gsub("Psychological Assessment: A Journal of Consulting and Clinical Psychology", "Psychological Assessment", all.meta$journal)
+
+all.meta$journal <- gsub("Psychomusicology: A Journal of Research in Music Cognition", "Psychomusicology: Music, Mind, and Brain", all.meta$journal)
+all.meta$journal <- gsub("Psychomusicology: Music, Mind and Brain", "Psychomusicology: Music, Mind, and Brain", all.meta$journal)
+
+all.meta$journal <- gsub("Psychosocial Rehabilitation Journal", "Psychiatric Rehabilitation Journal", all.meta$journal)
+
+all.meta$journal <- gsub("Psychotherapy: Theory, Research, Practice, Training", "Psychotherapy", all.meta$journal)
+
+all.meta$journal <- gsub("Theoretical & Philosophical Psychology", "Journal of Theoretical and Philosophical Psychology", all.meta$journal)
+
+#load file with journal names and APA-topics
+topics <- read.csv2("../data/apa_topics_dummies.csv", header = TRUE, stringsAsFactors = FALSE, strip.white = TRUE)
+
+#Merge with main dataframe
+all.meta <- merge(all.meta, topics, by = "journal")
+
+#Exclude any remaining entries unique to the topic 'core of psychology'
+all.meta <- all.meta[all.meta$Social.Psychology...Social.Processes == 1 | all.meta$Neuroscience...Cognition == 1 | all.meta$Industrial.Organizational.Psychology...Management == 1 |
+           all.meta$Health.Psychology...Medicine == 1 | all.meta$Forensic.Psychology  == 1 | all.meta$Educational.Psychology..School.Psychology...Training == 1 |
+           all.meta$Developmental.Psychology == 1 | all.meta$Clinical.Psychology == 1 | all.meta$Basic...Experimental.Psychology == 1,]
+
+write.csv(all.meta, file = "../data/metadata.all.csv", row.names = FALSE)
