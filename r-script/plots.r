@@ -166,7 +166,7 @@ p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
   geom_text(aes(y = percentage.marginal + 15, x = 2005, label = pmlabel), size = 3.5, na.rm= TRUE) +
   geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
   geom_text(aes(y = a.percentage.marginal - 15, x = 2005, label = amlabel), size = 3.5, na.rm= TRUE) +
-  annotate("rect", xmin = -Inf, ymin = 95, xmax = 1998, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  annotate("rect", xmin = -Inf, ymin = 95, xmax = 1998.5, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
   theme(strip.text = element_text(face = "bold"), 
         axis.title.y = element_text(size = 12), 
         axis.text.y = element_text(size = 9),
@@ -200,7 +200,7 @@ eq.p <- ddply(replication.sum, .(source), lm_eqn.p)
 
 #Base plot for faceting
 p.over.time <- ggplot(replication.sum, aes(x = year, y = p.per.a)) +
-  geom_area(linetype = "solid") +
+  geom_line(linetype = "solid") +
   annotate("rect", xmin = -Inf, ymin = 3.1, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
   theme(strip.text = element_text(face = "bold"), 
         axis.title.y = element_text(size = 12),
@@ -218,7 +218,8 @@ p2.over.time <- p.over.time +
             hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, ncol = 2) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-  scale_y_continuous(breaks = c(0, 1, 2, 3), labels = c("   0","1","2","3"), sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
+  scale_y_continuous(breaks = c(0, 1, 2, 3), labels = c("   0","1","2","3"), limits = c(0, 3.5), 
+                     sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
                      name = expression(paste(italic("p"), "-values (.05 - .1) per article")))
 
 #Combine the plot for marginal significance and number of p-values over time
@@ -226,7 +227,7 @@ combo <- ggdraw() +
   draw_plot(p2, x = 0, y = .3, width = 1, height = .7) +
   draw_plot(p2.over.time, x = 0, y = 0, width = 1, height = .325)
 
-#save_plot("../figures/jpsp-dp.png", plot = combo, base_width = 7, base_height = 7, dpi = 600)
+save_plot("../figures/jpsp-dp.pdf", plot = combo, base_width = 7, base_height = 7, dpi = 600)
 
 #------------------------------------------------
 #Plot of disciplines and all journals
@@ -276,7 +277,7 @@ g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("str
 grid.newpage()
 grid.draw(g)
 
-#ggsave("../figures/disciplines.png", plot = g, width = 7, height = 7, dpi = 600)
+ggsave("../figures/disciplines.pdf", plot = g, width = 7, height = 7, dpi = 600)
 
 #***********************************
 #df plot----
@@ -288,9 +289,9 @@ grid.draw(g)
 df <- read.csv("../data/final_df_dataset.csv", stringsAsFactors = FALSE)
 
 #Function for labelling solo figures
-lm_eqn3 = function(stat, df){
-  m = lm(stat ~ year, df);
-  eq <- substitute(paste("All APA Journals: ", italic(b) == beta), 
+lm_eqn3 = function(df){
+  m = lm(df2 ~ year, df);
+  eq <- substitute(paste("source: ", italic(b) == beta), 
                    list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                
 }
@@ -330,17 +331,21 @@ results.df$years2 <- NULL #remove to be able to rbind with overall dataframe
 results.df<- rbind(results.df, df.sum)
 results.df$source <- factor(results.df$source) #prepare for plotting
 
-df.eq <- lm_eqn3(results.df$df2, results.df) #linear model
+df.eq <- ddply(results.df, .(source), lm_eqn3) #linear model
+df.eq$V1 <- mapply(gsub, "source", df.eq$source, df.eq$V1) #make sure names are correct
 
 results.df$plabel <- ifelse(results.df$year == 2015, as.character(results.df$source), NA) #used for labelling at endpoints, because # of datapoints must match
 
 plot.df <- ggplot(results.df, aes(x = year, y = years2avg, group = source, alpha = source)) +
   geom_line() +
-  annotate("label", x = -Inf, y = Inf, label = df.eq, parse = TRUE, size = 3.5, hjust = 0, vjust = 1) +
+  annotate("text", x = 1984, y = seq(from = 175, to = 130, length.out = 10), label = df.eq$V1, 
+           parse = TRUE, size = 3.5, hjust = 0, vjust = 1) +
+  annotate("rect", xmin = -Inf, ymin = 123, xmax = 1994, ymax = Inf, alpha = .2, fill = "transparent",
+           color = "black") +
   geom_text_repel(aes(label = plabel), nudge_x = 3.5, na.rm = TRUE, size = 3, segment.alpha = 0.3) +
   scale_alpha_manual(guide = FALSE, values = c(1, rep(0.3, 9))) +
   scale_color_discrete(guide = FALSE) +
-  coord_cartesian(xlim = c(1985, 2016 + 4)) +
+  coord_cartesian(xlim = c(1985, 2016 + 4), ylim = c(20, 170)) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
   scale_y_continuous(name = "Median degrees of freedom", breaks = c(20, 70, 120, 170)) +
   theme(panel.background = element_rect(fill = "white"),
@@ -348,7 +353,7 @@ plot.df <- ggplot(results.df, aes(x = year, y = years2avg, group = source, alpha
         axis.title = element_text(size = 12), 
         axis.text = element_text(size = 9))
 
-# ggsave("../figures/df_plot.png", plot = plot.df, width = 7, height = 7, dpi = 600)
+ggsave("../figures/df_plot.pdf", plot = plot.df, width = 7, height = 7, dpi = 600)
 
 #***********************************
 #Additional alternative plots----
