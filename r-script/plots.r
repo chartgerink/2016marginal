@@ -8,7 +8,7 @@
 #Setup
 #----------------------------------
 if(!require(gdata)){install.packages("gdata")}
-library(gdata)
+library(gdata) #for 'combine' function. If not loading properly install strawberry perl (win) and restart cpu
 
 #Load p-value (.05 - .1) dataset
 dat <- read.csv("../data/final_marginal_dataset.csv", stringsAsFactors = FALSE)
@@ -136,14 +136,14 @@ library(cowplot)
 
 lm_eqn = function(df){
   m = lm(percentage.marginal ~ year, df);
-  eq <- substitute(paste(italic(p), "-values: ", italic(b) == beta), 
+  eq <- substitute(paste(italic(P), "-values: ", italic(b) == beta), 
                    list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                
 }
 
 lm_eqn2 = function(df){
   m = lm(a.percentage.marginal ~ year, df);
-  eq <- substitute(paste("articles: ", italic(b) == beta), 
+  eq <- substitute(paste("Articles: ", italic(b) == beta), 
                    list(beta = round(coef(m)[[2]], digits = 2)))
   as.character(as.expression(eq));                 
 }
@@ -157,18 +157,18 @@ eq <- ddply(replication.sum, .(source), lm_eqn)
 eq2 <- ddply(replication.sum, .(source), lm_eqn2)
 
 #controls location of labels in combination with geom_text
-replication.sum$pmlabel <- ifelse(replication.sum$year == 2014, "p-values", NA)
-replication.sum$amlabel <- ifelse(replication.sum$year == 2014, "articles", NA)
+replication.sum$pmlabel <- ifelse(replication.sum$year == 2014, "paste(italic(P),-values)", NA)
+replication.sum$amlabel <- ifelse(replication.sum$year == 2014, "Articles", NA)
 
 #Base for facet_wrap
 p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
   geom_line(linetype = "solid") +
-  geom_text(aes(y = percentage.marginal + 15, x = 2005, label = pmlabel), size = 3.5, na.rm= TRUE) +
+  geom_text(aes(y = percentage.marginal + 15, x = 2006, label = pmlabel), size = 3.17, na.rm= TRUE, parse = TRUE) +
   geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
-  geom_text(aes(y = a.percentage.marginal - 15, x = 2005, label = amlabel), size = 3.5, na.rm= TRUE) +
+  geom_text(aes(y = a.percentage.marginal - 15, x = 2005, label = amlabel), size = 3.17, na.rm= TRUE) +
   annotate("rect", xmin = -Inf, ymin = 95, xmax = 1998.5, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
-  theme(strip.text = element_text(face = "bold"), 
-        axis.title.y = element_text(size = 12), 
+  theme(strip.text = element_text(size = 12), 
+        axis.title.y = element_text(size = 10), 
         axis.text.y = element_text(size = 9),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank(),
@@ -179,12 +179,12 @@ p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
         panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
 
 #Facet wrap by journal
-p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.5, x = 1985 - 1, y = 99, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE) + 
-  geom_text(data = eq, aes(label = V1), size = 3.5, x = 1985 - 1, y = 100 + 4, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
+p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.17, x = 1985 - 1, y = 99, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE) + 
+  geom_text(data = eq, aes(label = V1), size = 3.17, x = 1985 - 1, y = 100 + 4, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, ncol = 3) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
   scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL), limits = c(0,100),
-                     name = "% reported as marginally significant")
+                     name = "% Reported as Marginally Significant")
 
 #Add plot of average p (.05 - .1)/article over time for JPSP and DP
 
@@ -202,9 +202,9 @@ eq.p <- ddply(replication.sum, .(source), lm_eqn.p)
 p.over.time <- ggplot(replication.sum, aes(x = year, y = p.per.a)) +
   geom_line(linetype = "solid") +
   annotate("rect", xmin = -Inf, ymin = 3.1, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
-  theme(strip.text = element_text(face = "bold"), 
-        axis.title.y = element_text(size = 12),
-        axis.title.x = element_text(size = 12),
+  theme(strip.text = element_text(size = 12), 
+        axis.title.y = element_text(size = 10),
+        axis.title.x = element_text(size = 10),
         axis.text = element_text(size = 9),
         panel.background = element_rect(fill = "white"),
         strip.background = element_blank(),
@@ -214,28 +214,29 @@ p.over.time <- ggplot(replication.sum, aes(x = year, y = p.per.a)) +
 
 #Facet wrap by journal
 p2.over.time <- p.over.time + 
-  geom_text(data = eq.p, aes(label = V1), size = 3.5, x = 1985 - 1, y = 3.5, 
+  geom_text(data = eq.p, aes(label = V1), size = 3.17, x = 1985 - 1, y = 3.5, 
             hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, ncol = 2) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
   scale_y_continuous(breaks = c(0, 1, 2, 3), labels = c("   0","1","2","3"), limits = c(0, 3.5), 
                      sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL),
-                     name = expression(paste(italic("p"), "-values (.05 - .1) per article")))
+                     name = expression(paste(italic("P"), "-values (.05 - .1) per Article")))
 
 #Combine the plot for marginal significance and number of p-values over time
 combo <- ggdraw() +
   draw_plot(p2, x = 0, y = .3, width = 1, height = .7) +
   draw_plot(p2.over.time, x = 0, y = 0, width = 1, height = .325)
 
-save_plot("../figures/jpsp-dp.pdf", plot = combo, base_width = 7, base_height = 7, dpi = 600)
+save_plot("../figures/jpsp-dp.pdf", plot = combo, base_width = 7, base_height = 7, 
+          dpi = 600, device = cairo_pdf())
 
 #------------------------------------------------
 #Plot of disciplines and all journals
 #------------------------------------------------
 
 #marginally significant results over time
-results.sum$pmlabel <- ifelse(results.sum$year == 2016, "p-values", NA)
-results.sum$amlabel <- ifelse(results.sum$year == 2016, "articles", NA)
+results.sum$pmlabel <- ifelse(results.sum$year == 2016, "paste(italic(P),-values)", NA)
+results.sum$amlabel <- ifelse(results.sum$year == 2016, "Articles", NA)
 
 eq <- ddply(results.sum, .(source), lm_eqn)
 eq2 <- ddply(results.sum, .(source), lm_eqn2)
@@ -243,11 +244,12 @@ eq2 <- ddply(results.sum, .(source), lm_eqn2)
 #base for facet wrap
 p <- ggplot(results.sum, aes(x = year, y = percentage.marginal)) +
   geom_line(linetype = "solid") +
-  geom_text(aes(y = 52, x = 2009, label = pmlabel), size = 2.5, na.rm= TRUE) +
+  geom_text(aes(y = 55, x = 2010, label = pmlabel), size = 3.17, na.rm= TRUE, parse = TRUE) +
   geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
-  geom_text(aes(y = 6, x = 2009, label = amlabel), size = 2.5, na.rm= TRUE) +
-  annotate("rect", xmin = -Inf, ymin = 75, xmax = 2007, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
-  theme(strip.text = element_text(face = "bold"), 
+  geom_text(aes(y = 3, x = 2009, label = amlabel), size = 3.17, na.rm= TRUE) +
+  annotate("rect", xmin = -Inf, ymin = 73, xmax = 2007, ymax = Inf, alpha = .2, 
+           fill = "transparent", color = "black") +
+  theme(strip.text = element_text(size = 12), 
         axis.title = element_text(size = 9), 
         axis.text = element_text(size = 9),
         panel.background = element_rect(fill = "white"),
@@ -256,12 +258,12 @@ p <- ggplot(results.sum, aes(x = year, y = percentage.marginal)) +
         panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"))
 
 #Facet wrap by discipline
-p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3, x = 1985 - 1, y = 90, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE) + 
-  geom_text(data = eq, aes(label = V1), size = 3, x = 1985 - 1, y = 100 + 4, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
+p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.17, x = 1985 - 1, y = 89, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE) + 
+  geom_text(data = eq, aes(label = V1), size = 3.17, x = 1985 - 1, y = 100 + 4, hjust = 0, vjust = 1, parse = TRUE, inherit.aes = FALSE)  +
   facet_wrap(~source, scales = "free", ncol = 3) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
   scale_y_continuous(sec.axis = dup_axis(name = "", breaks = NULL, labels = NULL), limits = c(0,100),
-                     name = "% reported as marginally significant")
+                     name = "% Reported as Marginally Significant")
 
 #Move 'social' plot to center of bottom row
 if(!require(grid)){install.packages("grid")}
@@ -277,12 +279,13 @@ g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("str
 grid.newpage()
 grid.draw(g)
 
-ggsave("../figures/disciplines.pdf", plot = g, width = 7, height = 7, dpi = 600)
+ggsave("../figures/disciplines.pdf", plot = g, width = 7, height = 7, dpi = 600, device = cairo_pdf())
 
 #***********************************
 #df plot----
 #***********************************
-#library(ggrepel)
+if(!require(ggrepel)){install.packages("ggrepel")}
+library(ggrepel)
 #library(plyr)
 #library(ggplot2)
 
@@ -339,21 +342,21 @@ results.df$plabel <- ifelse(results.df$year == 2015, as.character(results.df$sou
 plot.df <- ggplot(results.df, aes(x = year, y = years2avg, group = source, alpha = source)) +
   geom_line() +
   annotate("text", x = 1984, y = seq(from = 175, to = 130, length.out = 10), label = df.eq$V1, 
-           parse = TRUE, size = 3.5, hjust = 0, vjust = 1) +
+           parse = TRUE, size = 3.17, hjust = 0, vjust = 1) +
   annotate("rect", xmin = -Inf, ymin = 123, xmax = 1994, ymax = Inf, alpha = .2, fill = "transparent",
            color = "black") +
-  geom_text_repel(aes(label = plabel), nudge_x = 3.5, na.rm = TRUE, size = 3, segment.alpha = 0.3) +
+  geom_text_repel(aes(label = plabel), nudge_x = 3.5, na.rm = TRUE, size = 3.17, segment.alpha = 0.3) +
   scale_alpha_manual(guide = FALSE, values = c(1, rep(0.3, 9))) +
   scale_color_discrete(guide = FALSE) +
   coord_cartesian(xlim = c(1985, 2016 + 4), ylim = c(20, 170)) +
   scale_x_continuous(name = "Year", breaks = c(1985,1995,2005,2015)) +
-  scale_y_continuous(name = "Median degrees of freedom", breaks = c(20, 70, 120, 170)) +
+  scale_y_continuous(name = "Median Degrees of Freedom", breaks = c(20, 70, 120, 170)) +
   theme(panel.background = element_rect(fill = "white"),
         panel.border = element_rect(fill = NA, colour = "black", size = 0.5, linetype = "solid"),
-        axis.title = element_text(size = 12), 
+        axis.title = element_text(size = 10), 
         axis.text = element_text(size = 9))
 
-ggsave("../figures/df_plot.pdf", plot = plot.df, width = 7, height = 7, dpi = 600)
+ggsave("../figures/df_plot.pdf", plot = plot.df, width = 7, height = 7, dpi = 600, device = cairo_pdf())
 
 #***********************************
 #Additional alternative plots----
