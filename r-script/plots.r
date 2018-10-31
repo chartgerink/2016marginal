@@ -136,15 +136,17 @@ library(cowplot)
 
 lm_eqn = function(df){
   m = lm(percentage.marginal ~ year, df);
-  eq <- substitute(paste(italic(P), "-values: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[[2]], digits = 2)))
+  eq <- substitute(paste(italic(P), "-values: ", italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
+                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
+                        ci.ub = round(confint(m)[2,2], digits = 2)))
   as.character(as.expression(eq));                
 }
 
 lm_eqn2 = function(df){
   m = lm(a.percentage.marginal ~ year, df);
-  eq <- substitute(paste("Articles: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[[2]], digits = 2)))
+  eq <- substitute(paste("Articles: ", italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
+                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
+                        ci.ub = round(confint(m)[2,2], digits = 2)))
   as.character(as.expression(eq));                 
 }
 
@@ -165,8 +167,8 @@ p <- ggplot(replication.sum, aes(x = year, y = percentage.marginal)) +
   geom_line(linetype = "solid") +
   geom_text(aes(y = percentage.marginal + 15, x = 2006, label = pmlabel), size = 3.17, na.rm= TRUE, parse = TRUE) +
   geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
-  geom_text(aes(y = a.percentage.marginal - 15, x = 2005, label = amlabel), size = 3.17, na.rm= TRUE) +
-  annotate("rect", xmin = -Inf, ymin = 95, xmax = 1998.5, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  geom_text(aes(y = a.percentage.marginal - 15, x = 2006, label = amlabel), size = 3.17, na.rm= TRUE) +
+  annotate("rect", xmin = -Inf, ymin = 95, xmax = 2006, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
   theme(strip.text = element_text(size = 12), 
         axis.title.y = element_text(size = 10), 
         axis.text.y = element_text(size = 9),
@@ -191,8 +193,9 @@ p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.17, x = 1985 - 1, y = 
 #outcome variable different, hence different function
 lm_eqn.p = function(df){
   m = lm(p.per.a ~ year, df);
-  eq <- substitute(paste(italic(b) == beta), 
-                   list(beta = round(coef(m)[[2]], digits = 2)))
+  eq <- substitute(paste(italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
+                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
+                        ci.ub = round(confint(m)[2,2], digits = 2)))
   as.character(as.expression(eq));                
 }
 
@@ -201,7 +204,7 @@ eq.p <- ddply(replication.sum, .(source), lm_eqn.p)
 #Base plot for faceting
 p.over.time <- ggplot(replication.sum, aes(x = year, y = p.per.a)) +
   geom_line(linetype = "solid") +
-  annotate("rect", xmin = -Inf, ymin = 3.1, xmax = 1991, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
+  annotate("rect", xmin = -Inf, ymin = 3.1, xmax = 1997.5, ymax = Inf, alpha = .2, fill = "transparent", color = "black") +
   theme(strip.text = element_text(size = 12), 
         axis.title.y = element_text(size = 10),
         axis.title.x = element_text(size = 10),
@@ -247,7 +250,7 @@ p <- ggplot(results.sum, aes(x = year, y = percentage.marginal)) +
   geom_text(aes(y = 55, x = 2010, label = pmlabel), size = 3.17, na.rm= TRUE, parse = TRUE) +
   geom_line(aes(x = year, y = a.percentage.marginal), linetype = "dashed") +
   geom_text(aes(y = 3, x = 2009, label = amlabel), size = 3.17, na.rm= TRUE) +
-  annotate("rect", xmin = -Inf, ymin = 73, xmax = 2007, ymax = Inf, alpha = .2, 
+  annotate("rect", xmin = -Inf, ymin = 73, xmax = 2016, ymax = Inf, alpha = .2, 
            fill = "transparent", color = "black") +
   theme(strip.text = element_text(size = 12), 
         axis.title = element_text(size = 9), 
@@ -279,7 +282,7 @@ g$layout[grepl("strip-t-1-4", g$layout$name), c("l","r")] <- g$layout[grepl("str
 grid.newpage()
 grid.draw(g)
 
-ggsave("../figures/disciplines.pdf", plot = g, width = 7, height = 7, dpi = 600, device = cairo_pdf())
+ggsave("../figures/disciplines.pdf", plot = g, width = 8, height = 8, dpi = 600, device = cairo_pdf())
 
 #***********************************
 #df plot----
