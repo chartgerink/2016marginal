@@ -137,16 +137,16 @@ library(cowplot)
 lm_eqn = function(df){
   m = lm(percentage.marginal ~ year, df);
   eq <- substitute(paste(italic(P), "-values: ", italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
-                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
-                        ci.ub = round(confint(m)[2,2], digits = 2)))
+                   list(beta = format(round(coef(m)[[2]], digits = 2), nsmall = 2), ci.lb = format(round(confint(m)[2,1], digits = 2), nsmall = 2),
+                        ci.ub = format(round(confint(m)[2,2], digits = 2), nsmall = 2)))
   as.character(as.expression(eq));                
 }
 
 lm_eqn2 = function(df){
   m = lm(a.percentage.marginal ~ year, df);
   eq <- substitute(paste("Articles: ", italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
-                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
-                        ci.ub = round(confint(m)[2,2], digits = 2)))
+                   list(beta = format(round(coef(m)[[2]], digits = 2), nsmall = 2), ci.lb = format(round(confint(m)[2,1], digits = 2), nsmall = 2),
+                        ci.ub = format(round(confint(m)[2,2], digits = 2), nsmall = 2)))
   as.character(as.expression(eq));                 
 }
 
@@ -194,8 +194,8 @@ p2 <- p + geom_text(data = eq2, aes(label = V1), size = 3.17, x = 1985 - 1, y = 
 lm_eqn.p = function(df){
   m = lm(p.per.a ~ year, df);
   eq <- substitute(paste(italic(b) == beta, " [", ci.lb, ", ", ci.ub, "]"), 
-                   list(beta = round(coef(m)[[2]], digits = 2), ci.lb = round(confint(m)[2,1], digits = 2),
-                        ci.ub = round(confint(m)[2,2], digits = 2)))
+                   list(beta = format(round(coef(m)[[2]], digits = 2), nsmall = 2), ci.lb = format(round(confint(m)[2,1], digits = 2), nsmall = 2),
+                        ci.ub = format(round(confint(m)[2,2], digits = 2), nsmall = 2)))
   as.character(as.expression(eq));                
 }
 
@@ -298,7 +298,7 @@ df <- read.csv("../data/final_df_dataset.csv", stringsAsFactors = FALSE)
 lm_eqn3 = function(df){
   m = lm(df2 ~ year, df);
   eq <- substitute(paste("source: ", italic(b) == beta), 
-                   list(beta = round(coef(m)[[2]], digits = 2)))
+                   list(beta = format(round(coef(m)[[2]], digits = 2), nsmall = 2)))
   as.character(as.expression(eq));                
 }
 
@@ -359,7 +359,7 @@ plot.df <- ggplot(results.df, aes(x = year, y = years2avg, group = source, alpha
         axis.title = element_text(size = 10), 
         axis.text = element_text(size = 9))
 
-ggsave("../figures/df_plot.pdf", plot = plot.df, width = 7, height = 7, dpi = 600, device = cairo_pdf())
+ggsave("../figures/df_plot.png", plot = plot.df, width = 7, height = 7, dpi = 600, device = cairo_pdf())
 
 #***********************************
 #Additional alternative plots----

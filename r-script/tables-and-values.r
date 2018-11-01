@@ -70,10 +70,10 @@ p.dp <- length(dat$result[dat$journal == "Developmental Psychology"])
      
 #Number of p-values/article our data
   
-results.jpsp <- round(length(dat$result[dat$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2)
+results.jpsp <- format(round(length(dat$result[dat$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2), nsmall = 2)
 
   
-results.dp <- round(length(dat$result[dat$journal == "Developmental Psychology"]) / a.dp, digits = 2)
+results.dp <- format(round(length(dat$result[dat$journal == "Developmental Psychology"]) / a.dp, digits = 2), nsmall = 2)
 
 #number of p-values .05 < p <= .1 our data
   
@@ -82,9 +82,9 @@ p.limited.jpsp <- length(dat2$result[dat2$journal == "Journal of Personality and
 p.limited.dp <- length(dat2$result[dat2$journal == "Developmental Psychology"])
 
 #Number of .05 < p <= .1 per article our data
-limited.a.jpsp <- round(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2)
+limited.a.jpsp <- format(round(length(dat2$result[dat2$journal == "Journal of Personality and Social Psychology"]) / a.jpsp, digits = 2), nsmall = 2)
   
-limited.a.dp <- round(length(dat2$result[dat2$journal == "Developmental Psychology"]) / a.dp, digits = 2)
+limited.a.dp <- format(round(length(dat2$result[dat2$journal == "Developmental Psychology"]) / a.dp, digits = 2), nsmall = 2)
  
 #Percentage of .05 < p <= .1 marginally significant our data
 
@@ -94,12 +94,12 @@ marg.jpsp <- sum(dat2$marginal[dat2$journal == "Journal of Personality and Socia
 marg.dp <- sum(dat2$marginal[dat2$journal == "Developmental Psychology"]) /
                       length(dat2$result[dat2$journal == "Developmental Psychology"])
 
-#confidence interval for p-values (rounded and expressed as percentage)
+#confidence interval for p-values (rounded and expressed as percentage with two decimals))
 se.marg.jpsp <- sqrt(marg.jpsp*(1-marg.jpsp) / p.limited.jpsp) 
-ci.marg.jpsp <- round(100*c(marg.jpsp - se.marg.jpsp*qnorm(.975), marg.jpsp + se.marg.jpsp*qnorm(.975)), digits = 2)
+ci.marg.jpsp <- format(round(100*c(marg.jpsp - se.marg.jpsp*qnorm(.975), marg.jpsp + se.marg.jpsp*qnorm(.975)), digits = 2), nsmall = 2)
 
 se.marg.dp <- sqrt(marg.dp*(1-marg.dp) / p.limited.dp) 
-ci.marg.dp <- round(100*c(marg.dp - se.marg.dp*qnorm(.975), marg.dp + se.marg.dp*qnorm(.975)), digits = 2)
+ci.marg.dp <- format(round(100*c(marg.dp - se.marg.dp*qnorm(.975), marg.dp + se.marg.dp*qnorm(.975)), digits = 2), nsmall = 2)
 
 #Percentage of articles containing at least one marginally significant p-value our data
 marg.jpsp.a <- sum(dat.a$a.marginal[dat.a$journal == "Journal of Personality and Social Psychology"]) /
@@ -110,10 +110,10 @@ marg.dp.a <- sum(dat.a$a.marginal[dat.a$journal == "Developmental Psychology"]) 
 
 #confidence interval for articles (rounded and expressed as percentage)
 se.marg.jpsp.a <- sqrt(marg.jpsp.a*(1-marg.jpsp.a) / a.jpsp)
-ci.marg.jpsp.a <- round(100*c(marg.jpsp.a - se.marg.jpsp.a*qnorm(.975), marg.jpsp.a + se.marg.jpsp.a*qnorm(.975)), digits = 2)
+ci.marg.jpsp.a <- format(round(100*c(marg.jpsp.a - se.marg.jpsp.a*qnorm(.975), marg.jpsp.a + se.marg.jpsp.a*qnorm(.975)), digits = 2), nsmall = 2)
 
 se.marg.dp.a <- sqrt(marg.dp.a*(1-marg.dp.a) / a.dp)
-ci.marg.dp.a <- round(100*c(marg.dp.a - se.marg.dp.a*qnorm(.975), marg.dp.a + se.marg.dp.a*qnorm(.975)), digits = 2)   
+ci.marg.dp.a <- format(round(100*c(marg.dp.a - se.marg.dp.a*qnorm(.975), marg.dp.a + se.marg.dp.a*qnorm(.975)), digits = 2), nsmall = 2) 
 
 #Data frame of our data JSPS and DP
 df.rep <- data.frame("Journal" = c("JPSP", "DP"), "Time.span" = rep("1985 - 2016", 2), 
@@ -147,14 +147,14 @@ pritschet.marginal.jpsp <- sum(dat3$Marginals.Yes.No[dat3$Field == 3]) / pritsch
 
 pritschet.marginal.dp <- sum(dat3$Marginals.Yes.No[dat3$Field == 2]) / pritschet.articles.dp
 
-#confidence interval for articles Pritchet et al (rounded and expressed as percentage)
+#confidence interval for articles Pritchet et al (rounded and expressed as percentage with two decimals)
 se.pritschet.jpsp <- sqrt(pritschet.marginal.jpsp*(1-pritschet.marginal.jpsp) / pritschet.articles.jpsp)
-ci.pritschet.jpsp <- round(100*c(pritschet.marginal.jpsp - se.pritschet.jpsp*qnorm(.975),
-                                 pritschet.marginal.jpsp + se.pritschet.jpsp*qnorm(.975)), digits = 2)
+ci.pritschet.jpsp <- format(round(100*c(pritschet.marginal.jpsp - se.pritschet.jpsp*qnorm(.975),
+                                 pritschet.marginal.jpsp + se.pritschet.jpsp*qnorm(.975)), digits = 2), nsmall = 2)
 
 se.pritschet.dp <- sqrt(pritschet.marginal.dp*(1-pritschet.marginal.dp) / pritschet.articles.dp)
-ci.pritschet.dp <- round(100*c(pritschet.marginal.dp - se.pritschet.dp*qnorm(.975),
-                                 pritschet.marginal.dp + se.pritschet.dp*qnorm(.975)), digits = 2)  
+ci.pritschet.dp <- format(round(100*c(pritschet.marginal.dp - se.pritschet.dp*qnorm(.975),
+                                 pritschet.marginal.dp + se.pritschet.dp*qnorm(.975)), digits = 2), nsmall = 2)  
 
 #dataframe pritschet et al
 df.pritschet <- data.frame("Journal" = c("JPSP", "DP"), "Time.span" = rep("1970 - 2010", 2), 
@@ -182,17 +182,17 @@ num.articles <- c(length(unique(dat$doi)),length(unique(dat$doi[dat$Clinical.Psy
                   length(unique(dat$doi[dat$Forensic.Psychology == 1])), length(unique(dat$doi[dat$Health.Psychology...Medicine == 1])), 
                   length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])))
 
-#p-values per article
-p.per.article.overall <- round(length(dat$result) / length(unique(dat$doi)), digits = 2)
-p.per.article.clinical <- round(length(dat$result[dat$Clinical.Psychology == 1]) / length(unique(dat$doi[dat$Clinical.Psychology == 1])), digits = 2)
-p.per.article.cognitive <- round(length(dat$result[dat$Neuroscience...Cognition == 1]) / length(unique(dat$doi[dat$Neuroscience...Cognition == 1])), digits = 2)
-p.per.article.developmental <- round(length(dat$result[dat$Developmental.Psychology== 1]) / length(unique(dat$doi[dat$Developmental.Psychology == 1])), digits = 2)
-p.per.article.educational <- round(length(dat$result[dat$Educational.Psychology..School.Psychology...Training == 1]) / length(unique(dat$doi[dat$Educational.Psychology..School.Psychology...Training == 1])), digits = 2)
-p.per.article.experimental <- round(length(dat$result[dat$Basic...Experimental.Psychology == 1]) / length(unique(dat$doi[dat$Basic...Experimental.Psychology == 1])), digits = 2)
-p.per.article.forensic <- round(length(dat$result[dat$Forensic.Psychology == 1]) / length(unique(dat$doi[dat$Forensic.Psychology == 1])), digits = 2)
-p.per.article.health <- round(length(dat$result[dat$Health.Psychology...Medicine == 1]) / length(unique(dat$doi[dat$Health.Psychology...Medicine == 1])), digits = 2)
-p.per.article.organizational <- round(length(dat$result[dat$Industrial.Organizational.Psychology...Management == 1]) / length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), digits = 2)
-p.per.article.social <- round(length(dat$result[dat$Social.Psychology...Social.Processes == 1]) / length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])), digits = 2)
+#p-values per article (with two decimal places)
+p.per.article.overall <- format(round(length(dat$result) / length(unique(dat$doi)), digits = 2), nsmall = 2)
+p.per.article.clinical <- format(round(length(dat$result[dat$Clinical.Psychology == 1]) / length(unique(dat$doi[dat$Clinical.Psychology == 1])), digits = 2), nsmall = 2)
+p.per.article.cognitive <- format(round(length(dat$result[dat$Neuroscience...Cognition == 1]) / length(unique(dat$doi[dat$Neuroscience...Cognition == 1])), digits = 2), nsmall = 2)
+p.per.article.developmental <- format(round(length(dat$result[dat$Developmental.Psychology== 1]) / length(unique(dat$doi[dat$Developmental.Psychology == 1])), digits = 2), nsmall = 2)
+p.per.article.educational <- format(round(length(dat$result[dat$Educational.Psychology..School.Psychology...Training == 1]) / length(unique(dat$doi[dat$Educational.Psychology..School.Psychology...Training == 1])), digits = 2), nsmall = 2)
+p.per.article.experimental <- format(round(length(dat$result[dat$Basic...Experimental.Psychology == 1]) / length(unique(dat$doi[dat$Basic...Experimental.Psychology == 1])), digits = 2), nsmall = 2)
+p.per.article.forensic <- format(round(length(dat$result[dat$Forensic.Psychology == 1]) / length(unique(dat$doi[dat$Forensic.Psychology == 1])), digits = 2), nsmall = 2)
+p.per.article.health <- format(round(length(dat$result[dat$Health.Psychology...Medicine == 1]) / length(unique(dat$doi[dat$Health.Psychology...Medicine == 1])), digits = 2), nsmall = 2)
+p.per.article.organizational <- format(round(length(dat$result[dat$Industrial.Organizational.Psychology...Management == 1]) / length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), digits = 2), nsmall = 2)
+p.per.article.social <- format(round(length(dat$result[dat$Social.Psychology...Social.Processes == 1]) / length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])), digits = 2), nsmall = 2)
 
 # Number of .05 < p <= .1
 
@@ -202,16 +202,16 @@ num.p.limited <- c(length(dat2$result), length(dat2$result[dat2$Clinical.Psychol
                    length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]), length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]))
 
 # .05 < p <= .1 per article
-p.limited.overall <- round(length(dat2$result) / length(unique(dat$doi)), digits = 2)
-p.limited.clinical <- round(length(dat2$result[dat2$Clinical.Psychology == 1]) / length(unique(dat$doi[dat$Clinical.Psychology == 1])), digits = 2)
-p.limited.cognitive <- round(length(dat2$result[dat2$Neuroscience...Cognition == 1]) / length(unique(dat$doi[dat$Neuroscience...Cognition == 1])), digits = 2)
-p.limited.developmental <- round(length(dat2$result[dat2$Developmental.Psychology == 1]) / length(unique(dat$doi[dat$Developmental.Psychology == 1])), digits = 2)
-p.limited.educational <- round(length(dat2$result[dat2$Educational.Psychology..School.Psychology...Training == 1]) / length(unique(dat$doi[dat$Educational.Psychology..School.Psychology...Training == 1])), digits = 2)
-p.limited.experimental <- round(length(dat2$result[dat2$Basic...Experimental.Psychology == 1]) / length(unique(dat$doi[dat$Basic...Experimental.Psychology == 1])), digits = 2)
-p.limited.forensic <- round(length(dat2$result[dat2$Forensic.Psychology == 1]) / length(unique(dat$doi[dat$Forensic.Psychology == 1])), digits = 2)
-p.limited.health <- round(length(dat2$result[dat2$Health.Psychology...Medicine == 1]) / length(unique(dat$doi[dat$Health.Psychology...Medicine == 1])), digits = 2)
-p.limited.organizational <- round(length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]) / length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), digits = 2)
-p.limited.social <- round(length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]) / length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])), digits = 2)
+p.limited.overall <- format(round(length(dat2$result) / length(unique(dat$doi)), digits = 2), nsmall = 2)
+p.limited.clinical <- format(round(length(dat2$result[dat2$Clinical.Psychology == 1]) / length(unique(dat$doi[dat$Clinical.Psychology == 1])), digits = 2), nsmall = 2)
+p.limited.cognitive <- format(round(length(dat2$result[dat2$Neuroscience...Cognition == 1]) / length(unique(dat$doi[dat$Neuroscience...Cognition == 1])), digits = 2), nsmall = 2)
+p.limited.developmental <- format(round(length(dat2$result[dat2$Developmental.Psychology == 1]) / length(unique(dat$doi[dat$Developmental.Psychology == 1])), digits = 2), nsmall = 2)
+p.limited.educational <- format(round(length(dat2$result[dat2$Educational.Psychology..School.Psychology...Training == 1]) / length(unique(dat$doi[dat$Educational.Psychology..School.Psychology...Training == 1])), digits = 2), nsmall = 2)
+p.limited.experimental <- format(round(length(dat2$result[dat2$Basic...Experimental.Psychology == 1]) / length(unique(dat$doi[dat$Basic...Experimental.Psychology == 1])), digits = 2), nsmall = 2)
+p.limited.forensic <- format(round(length(dat2$result[dat2$Forensic.Psychology == 1]) / length(unique(dat$doi[dat$Forensic.Psychology == 1])), digits = 2), nsmall = 2)
+p.limited.health <- format(round(length(dat2$result[dat2$Health.Psychology...Medicine == 1]) / length(unique(dat$doi[dat$Health.Psychology...Medicine == 1])), digits = 2), nsmall = 2)
+p.limited.organizational <- format(round(length(dat2$result[dat2$Industrial.Organizational.Psychology...Management == 1]) / length(unique(dat$doi[dat$Industrial.Organizational.Psychology...Management == 1])), digits = 2), nsmall = 2)
+p.limited.social <- format(round(length(dat2$result[dat2$Social.Psychology...Social.Processes == 1]) / length(unique(dat$doi[dat$Social.Psychology...Social.Processes == 1])), digits = 2), nsmall = 2)
 
 #Percentage of .05 < p <= .1 marginally significant
 marg.overall <- sum(dat2$marginal) / length(dat2$result)
@@ -256,11 +256,11 @@ marg.all.a <- c(overall.marg.a, sub.marg.a[,1])
 
 #confidence interval for p-values (rounded and expressed as percentage)
 se.marg.all <- sqrt(marg.all*(1-marg.all) / num.p.limited)
-ci.marg.all <- round(100*c(marg.all - se.marg.all*qnorm(.975), marg.all + se.marg.all*qnorm(.975)), digits = 2)
+ci.marg.all <- format(round(100*c(marg.all - se.marg.all*qnorm(.975), marg.all + se.marg.all*qnorm(.975)), digits = 2), nsmall = 2)
 
 #confidence interval for marg. articles (rounded and expressed as percentage)
 se.marg.all.a <- sqrt(marg.all.a*(1-marg.all.a) / num.articles)
-ci.marg.all.a <- round(100*c(marg.all.a - se.marg.all.a*qnorm(.975), marg.all.a + se.marg.all.a*qnorm(.975)), digits = 2)
+ci.marg.all.a <- format(round(100*c(marg.all.a - se.marg.all.a*qnorm(.975), marg.all.a + se.marg.all.a*qnorm(.975)), digits = 2), nsmall = 2)
 
 #Dataframe for table
 df.table1 <- data.frame("Field" = c("All APA journals", "Clinical", "Cognitive", "Developmental", "Educational",
